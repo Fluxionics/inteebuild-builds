@@ -1,0 +1,12 @@
+{
+  "appId": "com.inteebuild.testappintee",
+  "appName": "Test App INTEE Build",
+  "webDir": "www",
+  "server": {
+    "cleartext": true,
+    "androidScheme": "https"
+  },
+  "android": {
+    "allowMixedContent": true
+  }
+}

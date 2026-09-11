@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>InteeBuild Permission Test</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 20px;
+      font-family: Arial, sans-serif;
+      background: #10141c;
+      color: white;
+    }
+
+    .container {
+      max-width: 700px;
+      margin: auto;
+    }
+
+    h1 {
+      margin-bottom: 5px;
+    }
+
+    .subtitle {
+      color: #aaa;
+      margin-top: 0;
+    }
+
+    .card {
+      background: #181e29;
+      border: 1px solid #2b3445;
+      border-radius: 14px;
+      padding: 16px;
+      margin: 12px 0;
+    }
+
+    button {
+      border: 0;
+      border-radius: 9px;
+      padding: 10px 14px;
+      margin: 4px;
+      background: #2878ff;
+      color: white;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    button:hover {
+      opacity: .85;
+    }
+
+    button.danger {
+      background: #e53935;
+    }
+
+    button.success {
+      background: #20a464;
+    }
+
+    .status {
+      margin-top: 10px;
+      padding: 10px;
+      border-radius: 8px;
+      background: #0d1118;
+      color: #bbb;
+      white-space: pre-wrap;
+    }
+
+    video {
+      width: 100%;
+      max-height: 300px;
+      background: black;
+      border-radius: 10px;
+      margin-top: 10px;
+    }
+
+    audio {
+      width: 100%;
+      margin-top: 10px;
+    }
+
+    input[type="file"] {
+      width: 100%;
+      margin-top: 8px;
+    }
+
+    .ok {
+      color: #48e08a;
+    }
+
+    .error {
+      color: #ff6868;
+    }
+
+    .warning {
+      color: #ffd166;
+    }
+
+    small {
+      color: #888;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <h1>🧪 InteeBuild Permission Test</h1>
+  <p class="subtitle">
+    Prueba de permisos y funciones Android
+  </p>
+
+  <!-- INFORMACIÓN -->
+  <div class="card">
+    <h2>📱 Información</h2>
+    <button onclick="deviceInfo()">Comprobar dispositivo</button>
+    <div id="deviceStatus" class="status">Sin comprobar.</div>
+  </div>
+
+  <!-- AUDIO -->
+  <div class="card">
+    <h2>🎵 Audio / Streaming</h2>
+
+    <audio id="radio" controls preload="none">
+      <source
+        src="https://stream-154.zeno.fm/uurkc2b5u0hvv?zt=eyJhbGciOiJIUzI1NiJ9.eyJzdHJlYW0iOiJ1dXJrYzJiNXUwaHZ2IiwiaG9zdCI6InN0cmVhbS0xNTQuemVuby5mbSIsInJ0dGwiOjUsImp0aSI6Ikhva3NhTU1GUmdtYkNXU3psODJma1EiLCJpYXQiOjE3MzY0NzkxNTIsImV4cCI6MTczNjQ3OTIxMn0.-IJTyutvzFpXXz10SQLDTFtIEsf7JSs_IwvYQNsfyfQ"
+        type="audio/mpeg">
+    </audio>
+
+    <button onclick="playRadio()">▶️ Reproducir</button>
+    <button onclick="stopRadio()" class="danger">⏹️ Detener</button>
+
+    <div id="audioStatus" class="status">
+      Esperando prueba...
+    </div>
+  </div>
+
+  <!-- MICRÓFONO -->
+  <div class="card">
+    <h2>🎤 Micrófono</h2>
+
+    <button onclick="testMicrophone()">
+      Probar micrófono
+    </button>
+
+    <button onclick="stopMicrophone()" class="danger">
+      Detener
+    </button>
+
+    <div id="micStatus" class="status">
+      Sin probar.
+    </div>
+  </div>
+
+  <!-- CÁMARA -->
+  <div class="card">
+    <h2>📷 Cámara</h2>
+
+    <button onclick="testCamera()">
+      Activar cámara
+    </button>
+
+    <button onclick="stopCamera()" class="danger">
+      Detener cámara
+    </button>
+
+    <video id="camera" autoplay playsinline muted></video>
+
+    <div id="cameraStatus" class="status">
+      Sin probar.
+    </div>
+  </div>
+
+  <!-- GPS -->
+  <div class="card">
+    <h2>📍 GPS / Ubicación</h2>
+
+    <button onclick="testGPS()">
+      Obtener ubicación
+    </button>
+
+    <div id="gpsStatus" class="status">
+      Sin probar.
+    </div>
+  </div>
+
+  <!-- NOTIFICACIONES -->
+  <div class="card">
+    <h2>🔔 Notificaciones</h2>
+
+    <button onclick="testNotifications()">
+      Solicitar permiso
+    </button>
+
+    <button onclick="sendNotification()">
+      Enviar prueba
+    </button>
+
+    <div id="notificationStatus" class="status">
+      Sin probar.
+    </div>
+  </div>
+
+  <!-- ARCHIVOS -->
+  <div class="card">
+    <h2>💾 Archivos / almacenamiento</h2>
+
+    <input
+      id="fileInput"
+      type="file"
+      multiple
+      onchange="testFiles()"
+    >
+
+    <div id="fileStatus" class="status">
+      Selecciona uno o varios archivos.
+    </div>
+  </div>
+
+  <!-- VIBRACIÓN -->
+  <div class="card">
+    <h2>📳 Vibración</h2>
+
+    <button onclick="testVibration()">
+      Vibrar
+    </button>
+
+    <div id="vibrationStatus" class="status">
+      Sin probar.
+    </div>
+  </div>
+
+  <!-- FULLSCREEN -->
+  <div class="card">
+    <h2>⛶ Pantalla completa</h2>
+
+    <button onclick="enterFullscreen()">
+      Activar fullscreen
+    </button>
+
+    <button onclick="exitFullscreen()">
+      Salir
+    </button>
+
+    <div id="fullscreenStatus" class="status">
+      Sin probar.
+    </div>
+  </div>
+
+  <!-- KEEP SCREEN ON -->
+  <div class="card">
+    <h2>☀️ Mantener pantalla encendida</h2>
+
+    <button onclick="keepScreenOn()">
+      Activar
+    </button>
+
+    <button onclick="releaseScreenOn()">
+      Desactivar
+    </button>
+
+    <div id="screenStatus" class="status">
+      Sin probar.
+    </div>
+  </div>
+
+  <!-- RESULTADO -->
+  <div class="card">
+    <h2>📊 Resultado</h2>
+
+    <div id="result" class="status">
+      Ejecuta las pruebas anteriores.
+    </div>
+
+    <button onclick="runBasicTests()" class="success">
+      🚀 Prueba rápida
+    </button>
+  </div>
+
+</div>
+
+<script>
+
+  /* =========================
+     VARIABLES
+  ========================= */
+
+  let cameraStream = null;
+  let microphoneStream = null;
+  let wakeLock = null;
+
+
+  /* =========================
+     DISPOSITIVO
+  ========================= */
+
+  function deviceInfo() {
+
+    const info =
+      "User Agent:\n" +
+      navigator.userAgent +
+      "\n\nPlataforma:\n" +
+      (navigator.platform || "Desconocida") +
+      "\n\nOnline:\n" +
+      navigator.onLine +
+      "\n\nIdioma:\n" +
+      navigator.language +
+      "\n\nCookies:\n" +
+      navigator.cookieEnabled;
+
+    document.getElementById("deviceStatus").textContent = info;
+  }
+
+
+  /* =========================
+     AUDIO
+  ========================= */
+
+  function playRadio() {
+
+    const radio = document.getElementById("radio");
+
+    radio.play()
+      .then(() => {
+        document.getElementById("audioStatus").innerHTML =
+          '<span class="ok">✅ Streaming reproduciéndose correctamente.</span>';
+      })
+      .catch(error => {
+        document.getElementById("audioStatus").innerHTML =
+          '<span class="error">❌ No se pudo reproducir: ' +
+          error.message +
+          '</span>';
+      });
+  }
+
+
+  function stopRadio() {
+
+    const radio = document.getElementById("radio");
+
+    radio.pause();
+    radio.currentTime = 0;
+
+    document.getElementById("audioStatus").textContent =
+      "⏹️ Streaming detenido.";
+  }
+
+
+  /* =========================
+     MICRÓFONO
+  ========================= */
+
+  async function testMicrophone() {
+
+    try {
+
+      microphoneStream =
+        await navigator.mediaDevices.getUserMedia({
+          audio: true
+        });
+
+      document.getElementById("micStatus").innerHTML =
+        '<span class="ok">✅ Micrófono permitido.</span>';
+
+    } catch (error) {
+
+      document.getElementById("micStatus").innerHTML =
+        '<span class="error">❌ Micrófono rechazado o no disponible: ' +
+        error.message +
+        '</span>';
+    }
+  }
+
+
+  function stopMicrophone() {
+
+    if (microphoneStream) {
+
+      microphoneStream
+        .getTracks()
+        .forEach(track => track.stop());
+
+      microphoneStream = null;
+    }
+
+    document.getElementById("micStatus").textContent =
+      "⏹️ Micrófono detenido.";
+  }
+
+
+  /* =========================
+     CÁMARA
+  ========================= */
+
+  async function testCamera() {
+
+    try {
+
+      cameraStream =
+        await navigator.mediaDevices.getUserMedia({
+          video: true
+        });
+
+      const video =
+        document.getElementById("camera");
+
+      video.srcObject = cameraStream;
+
+      document.getElementById("cameraStatus").innerHTML =
+        '<span class="ok">✅ Cámara permitida.</span>';
+
+    } catch (error) {
+
+      document.getElementById("cameraStatus").innerHTML =
+        '<span class="error">❌ Cámara rechazada o no disponible: ' +
+        error.message +
+        '</span>';
+    }
+  }
+
+
+  function stopCamera() {
+
+    if (cameraStream) {
+
+      cameraStream
+        .getTracks()
+        .forEach(track => track.stop());
+
+      cameraStream = null;
+    }
+
+    document.getElementById("camera").srcObject = null;
+
+    document.getElementById("cameraStatus").textContent =
+      "⏹️ Cámara detenida.";
+  }
+
+
+  /* =========================
+     GPS
+  ========================= */
+
+  function testGPS() {
+
+    if (!navigator.geolocation) {
+
+      document.getElementById("gpsStatus").innerHTML =
+        '<span class="error">❌ Geolocalización no disponible.</span>';
+
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+
+      position => {
+
+        const lat =
+          position.coords.latitude;
+
+        const lon =
+          position.coords.longitude;
+
+        const accuracy =
+          position.coords.accuracy;
+
+        document.getElementById("gpsStatus").innerHTML =
+          '<span class="ok">✅ GPS permitido.</span>\n\n' +
+          "Latitud: " + lat +
+          "\nLongitud: " + lon +
+          "\nPrecisión: " + accuracy + " metros";
+      },
+
+      error => {
+
+        document.getElementById("gpsStatus").innerHTML =
+          '<span class="error">❌ GPS rechazado/no disponible.\n' +
+          error.message +
+          '</span>';
+      },
+
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 0
+      }
+    );
+  }
+
+
+  /* =========================
+     NOTIFICACIONES
+  ========================= */
+
+  async function testNotifications() {
+
+    if (!("Notification" in window)) {
+
+      document.getElementById("notificationStatus").innerHTML =
+        '<span class="error">❌ Notificaciones no disponibles.</span>';
+
+      return;
+    }
+
+    try {
+
+      const permission =
+        await Notification.requestPermission();
+
+      document.getElementById("notificationStatus").innerHTML =
+        "Estado: " + permission;
+
+      if (permission === "granted") {
+
+        document.getElementById("notificationStatus").innerHTML +=
+          '\n<span class="ok">✅ Permiso concedido.</span>';
+
+      } else {
+
+        document.getElementById("notificationStatus").innerHTML +=
+          '\n<span class="warning">⚠️ Permiso no concedido.</span>';
+      }
+
+    } catch (error) {
+
+      document.getElementById("notificationStatus").textContent =
+        "❌ Error: " + error.message;
+    }
+  }
+
+
+  function sendNotification() {
+
+    if (!("Notification" in window)) {
+      return;
+    }
+
+    if (Notification.permission !== "granted") {
+
+      alert("Primero concede el permiso de notificaciones.");
+
+      return;
+    }
+
+    new Notification(
+      "InteeBuild Test",
+      {
+        body: "🔔 Las notificaciones funcionan correctamente.",
+        icon: ""
+      }
+    );
+  }
+
+
+  /* =========================
+     ARCHIVOS
+  ========================= */
+
+  function testFiles() {
+
+    const input =
+      document.getElementById("fileInput");
+
+    const files = input.files;
+
+    if (!files.length) {
+
+      document.getElementById("fileStatus").textContent =
+        "No se seleccionó ningún archivo.";
+
+      return;
+    }
+
+    let text =
+      '<span class="ok">✅ Selector de archivos funcionando.</span>\n\n';
+
+    text += "Archivos: " + files.length + "\n\n";
+
+    for (const file of files) {
+
+      text +=
+        "• " +
+        file.name +
+        " (" +
+        Math.round(file.size / 1024) +
+        " KB)\n";
+    }
+
+    document.getElementById("fileStatus").innerHTML =
+      text;
+  }
+
+
+  /* =========================
+     VIBRACIÓN
+  ========================= */
+
+  function testVibration() {
+
+    if (!navigator.vibrate) {
+
+      document.getElementById("vibrationStatus").innerHTML =
+        '<span class="error">❌ Vibración no disponible.</span>';
+
+      return;
+    }
+
+    navigator.vibrate([200, 100, 200]);
+
+    document.getElementById("vibrationStatus").innerHTML =
+      '<span class="ok">✅ Solicitud de vibración enviada.</span>';
+  }
+
+
+  /* =========================
+     FULLSCREEN
+  ========================= */
+
+  async function enterFullscreen() {
+
+    try {
+
+      await document.documentElement.requestFullscreen();
+
+      document.getElementById("fullscreenStatus").innerHTML =
+        '<span class="ok">✅ Pantalla completa activada.</span>';
+
+    } catch (error) {
+
+      document.getElementById("fullscreenStatus").innerHTML =
+        '<span class="error">❌ Fullscreen no disponible: ' +
+        error.message +
+        '</span>';
+    }
+  }
+
+
+  async function exitFullscreen() {
+
+    if (document.fullscreenElement) {
+
+      await document.exitFullscreen();
+
+      document.getElementById("fullscreenStatus").textContent =
+        "⏹️ Pantalla completa desactivada.";
+    }
+  }
+
+
+  /* =========================
+     WAKE LOCK
+  ========================= */
+
+  async function keepScreenOn() {
+
+    if (!("wakeLock" in navigator)) {
+
+      document.getElementById("screenStatus").innerHTML =
+        '<span class="warning">⚠️ Wake Lock no disponible.</span>';
+
+      return;
+    }
+
+    try {
+
+      wakeLock =
+        await navigator.wakeLock.request("screen");
+
+      document.getElementById("screenStatus").innerHTML =
+        '<span class="ok">✅ Pantalla configurada para permanecer encendida.</span>';
+
+    } catch (error) {
+
+      document.getElementById("screenStatus").innerHTML =
+        '<span class="error">❌ No se pudo activar: ' +
+        error.message +
+        '</span>';
+    }
+  }
+
+
+  async function releaseScreenOn() {
+
+    if (wakeLock) {
+
+      await wakeLock.release();
+
+      wakeLock = null;
+    }
+
+    document.getElementById("screenStatus").textContent =
+      "☀️ Wake Lock desactivado.";
+  }
+
+
+  /* =========================
+     PRUEBA RÁPIDA
+  ========================= */
+
+  async function runBasicTests() {
+
+    let result = "";
+
+    result +=
+      "🌐 Internet: " +
+      (navigator.onLine ? "✅ OK" : "❌ OFFLINE") +
+      "\n";
+
+    result +=
+      "🎤 Micrófono API: " +
+      (navigator.mediaDevices?.getUserMedia ? "✅ Disponible" : "❌ No disponible") +
+      "\n";
+
+    result +=
+      "📍 GPS API: " +
+      (navigator.geolocation ? "✅ Disponible" : "❌ No disponible") +
+      "\n";
+
+    result +=
+      "🔔 Notificaciones API: " +
+      ("Notification" in window ? "✅ Disponible" : "❌ No disponible") +
+      "\n";
+
+    result +=
+      "📳 Vibración API: " +
+      (navigator.vibrate ? "✅ Disponible" : "❌ No disponible") +
+      "\n";
+
+    result +=
+      "⛶ Fullscreen API: " +
+      (document.documentElement.requestFullscreen ? "✅ Disponible" : "❌ No disponible") +
+      "\n";
+
+    result +=
+      "☀️ Wake Lock API: " +
+      ("wakeLock" in navigator ? "✅ Disponible" : "❌ No disponible");
+
+    document.getElementById("result").textContent =
+      result;
+  }
+
+</script>
+
+</body>
+</html>
