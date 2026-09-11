@@ -9,6 +9,7 @@ on:
 
 permissions:
   contents: read
+  actions: write
 
 jobs:
   compile:
@@ -21,7 +22,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: npm
 
       - name: Setup Java
         uses: actions/setup-java@v4
@@ -29,20 +29,20 @@ jobs:
           distribution: temurin
           java-version: '17'
 
-      - name: Read build config
-        id: config
+- name: Read build config
         run: |
-          echo "COMPILE_SDK=$(node -p 'require(\"./build-config.json\").compileSdk')" >> "$GITHUB_ENV"
-          echo "TARGET_SDK=$(node -p 'require(\"./build-config.json\").targetSdk')" >> "$GITHUB_ENV"
-          echo "MIN_SDK=$(node -p 'require(\"./build-config.json\").minSdk')" >> "$GITHUB_ENV"
+          echo '--- build-config.json ---'
+          cat build-config.json
+          node - <<'EOF' >> "$GITHUB_ENV"
+          const c = require('./build-config.json');
+          process.stdout.write("COMPILE_SDK=" + c.compileSdk + "\n");
+          process.stdout.write("TARGET_SDK=" + c.targetSdk + "\n");
+          process.stdout.write("MIN_SDK=" + c.minSdk + "\n");
+          EOF
+          cat "$GITHUB_ENV"
 
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
-
-      - name: Install compileSdk platform
-        run: |
-          yes | sdkmanager --licenses > /dev/null 2>&1 || true
-          sdkmanager "platforms;android-${{ env.COMPILE_SDK }}" "build-tools;34.0.0" > /dev/null
 
       - name: Install dependencies
         run: npm install
@@ -52,9 +52,11 @@ jobs:
 
       - name: Apply SDK versions
         run: |
-          sed -i "s/minSdkVersion = .*/minSdkVersion = ${{ env.MIN_SDK }}/" android/variables.gradle
-          sed -i "s/compileSdkVersion = .*/compileSdkVersion = ${{ env.COMPILE_SDK }}/" android/variables.gradle
-          sed -i "s/targetSdkVersion = .*/targetSdkVersion = ${{ env.TARGET_SDK }}/" android/variables.gradle
+          sed -i "s/minSdkVersion = .*/minSdkVersion = ${MIN_SDK:-23}/" android/variables.gradle
+          sed -i "s/compileSdkVersion = .*/compileSdkVersion = ${COMPILE_SDK:-35}/" android/variables.gradle
+          sed -i "s/targetSdkVersion = .*/targetSdkVersion = ${TARGET_SDK:-35}/" android/variables.gradle
+          echo '--- variables.gradle ---'
+          sed -n '1,12p' android/variables.gradle
 
       - name: Apply permissions manifest
         run: cp main-manifest.xml android/app/src/main/AndroidManifest.xml
