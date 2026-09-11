@@ -29,16 +29,13 @@ jobs:
           distribution: temurin
           java-version: '17'
 
-- name: Read build config
+      - name: Read build config
         run: |
           echo '--- build-config.json ---'
           cat build-config.json
-          node - <<'EOF' >> "$GITHUB_ENV"
-          const c = require('./build-config.json');
-          process.stdout.write("COMPILE_SDK=" + c.compileSdk + "\n");
-          process.stdout.write("TARGET_SDK=" + c.targetSdk + "\n");
-          process.stdout.write("MIN_SDK=" + c.minSdk + "\n");
-          EOF
+          echo "COMPILE_SDK=$(node -p 'require("./build-config.json").compileSdk')" >> "$GITHUB_ENV"
+          echo "TARGET_SDK=$(node -p 'require("./build-config.json").targetSdk')" >> "$GITHUB_ENV"
+          echo "MIN_SDK=$(node -p 'require("./build-config.json").minSdk')" >> "$GITHUB_ENV"
           cat "$GITHUB_ENV"
 
       - name: Setup Android SDK
