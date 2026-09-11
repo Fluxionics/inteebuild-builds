@@ -27,7 +27,7 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: '17'
+          java-version: '21'
 
       - name: Read build config
         run: |
@@ -46,6 +46,9 @@ jobs:
 
       - name: Add Capacitor Android platform
         run: npx cap add android
+
+      - name: Suppress compileSdk warning
+        run: echo 'android.suppressUnsupportedCompileSdk=36' >> android/gradle.properties
 
       - name: Apply SDK versions
         run: |
