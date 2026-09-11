@@ -6,6 +6,11 @@ on:
         description: 'Build ID (InteeBuild)'
         required: true
         type: string
+      outputType:
+        description: 'Output type (apk/aab/both)'
+        required: false
+        type: string
+        default: 'apk'
 
 permissions:
   contents: read
@@ -76,9 +81,22 @@ jobs:
         working-directory: android
         run: ./gradlew assembleDebug --no-daemon
 
+      - name: Compile AAB
+        if: ${{ github.event.inputs.outputType == 'aab' || github.event.inputs.outputType == 'both' }}
+        working-directory: android
+        run: ./gradlew bundleDebug --no-daemon
+
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: inteebuild-${{ github.event.inputs.id }}-apk
           path: android/app/build/outputs/apk/debug/*.apk
+          if-no-files-found: error
+
+      - name: Upload AAB
+        if: ${{ github.event.inputs.outputType == 'aab' || github.event.inputs.outputType == 'both' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: inteebuild-${{ github.event.inputs.id }}-aab
+          path: android/app/build/outputs/bundle/debug/*.aab
           if-no-files-found: error
