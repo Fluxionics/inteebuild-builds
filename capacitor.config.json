@@ -1,0 +1,12 @@
+{
+  "appId": "radio.cordero.inteebuild",
+  "appName": "Radio Cordero",
+  "webDir": "www",
+  "server": {
+    "cleartext": true,
+    "androidScheme": "https"
+  },
+  "android": {
+    "allowMixedContent": true
+  }
+}
