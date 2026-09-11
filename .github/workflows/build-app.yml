@@ -38,9 +38,9 @@ jobs:
         run: |
           echo '--- build-config.json ---'
           cat build-config.json
-          echo "COMPILE_SDK=$(node -p 'require("./build-config.json").compileSdk')" >> "$GITHUB_ENV"
-          echo "TARGET_SDK=$(node -p 'require("./build-config.json").targetSdk')" >> "$GITHUB_ENV"
-          echo "MIN_SDK=$(node -p 'require("./build-config.json").minSdk')" >> "$GITHUB_ENV"
+          echo "COMPILE_SDK=$(node -p 'require(\"./build-config.json\").compileSdk')" >> "$GITHUB_ENV"
+          echo "TARGET_SDK=$(node -p 'require(\"./build-config.json\").targetSdk')" >> "$GITHUB_ENV"
+          echo "MIN_SDK=$(node -p 'require(\"./build-config.json\").minSdk')" >> "$GITHUB_ENV"
           cat "$GITHUB_ENV"
 
       - name: Setup Android SDK
@@ -76,6 +76,25 @@ jobs:
 
       - name: Sync Capacitor
         run: npx cap sync android
+
+      - name: Apply adaptive icon
+        if: ${{ hashFiles('adaptive-foreground.png') != '' }}
+        run: |
+          mkdir -p android/app/src/main/res/mipmap-anydpi-v26
+          cp adaptive-ic_launcher.xml android/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml
+          cp adaptive-ic_launcher_round.xml android/app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml
+          cp adaptive-foreground.png android/app/src/main/res/mipmap-xxhdpi/ic_launcher_foreground.png
+          cp adaptive-bg.xml android/app/src/main/res/values/ic_launcher_background.xml
+
+      - name: Apply custom colors
+        if: ${{ hashFiles('custom-colors.xml') != '' }}
+        run: cp custom-colors.xml android/app/src/main/res/values/colors.xml
+
+      - name: Inject JS bridge
+        if: "hashFiles('inteebridge-inject.js') != ''"
+        run: |
+          mkdir -p android/app/src/main/assets/public
+          cp inteebridge-inject.js android/app/src/main/assets/public/inteebridge.js
 
       - name: Configure custom signing
         if: ${{ hashFiles('user-keystore.jks') != '' }}
