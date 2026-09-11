@@ -1,0 +1,13 @@
+{
+  "appId": "centroautomotriz.sanchez.intee",
+  "appName": "Centro Automotriz Sanchéz",
+  "webDir": "www",
+  "server": {
+    "cleartext": true,
+    "androidScheme": "https",
+    "url": "https://centroautomotriz.vercel.app/"
+  },
+  "android": {
+    "allowMixedContent": true
+  }
+}
