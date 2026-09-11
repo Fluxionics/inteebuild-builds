@@ -1,0 +1,13 @@
+{
+  "name": "inteebuild-app",
+  "version": "2.0.0",
+  "private": true,
+  "scripts": {
+    "sync": "cap sync"
+  },
+  "dependencies": {
+    "@capacitor/cli": "^7.4.1",
+    "@capacitor/core": "^7.4.1",
+    "@capacitor/android": "^7.4.1"
+  }
+}

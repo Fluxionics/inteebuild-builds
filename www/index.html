@@ -1,0 +1,991 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>InteeBuild — Test de Permisos</title>
+<style>
+  :root {
+    --bg: #0d1117;
+    --surface: #161b22;
+    --border: #30363d;
+    --accent: #58a6ff;
+    --green: #3fb950;
+    --yellow: #d29922;
+    --red: #f85149;
+    --text: #e6edf3;
+    --muted: #8b949e;
+    --radius: 8px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    font-size: 14px;
+    line-height: 1.6;
+    padding: 24px 16px;
+  }
+
+  header {
+    text-align: center;
+    margin-bottom: 32px;
+  }
+
+  header h1 {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--accent);
+    letter-spacing: -0.3px;
+  }
+
+  header p {
+    color: var(--muted);
+    font-size: 13px;
+    margin-top: 4px;
+  }
+
+  .badge {
+    display: inline-block;
+    background: #1f2937;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 20px;
+    margin-top: 8px;
+  }
+
+  .section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    margin-bottom: 16px;
+    overflow: hidden;
+  }
+
+  .section-header {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+    font-size: 13px;
+  }
+
+  .section-header .icon { font-size: 16px; }
+
+  .section-body { padding: 16px; }
+
+  .perm-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  @media (max-width: 480px) {
+    .perm-grid { grid-template-columns: 1fr; }
+  }
+
+  .perm-item {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 10px 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: border-color 0.15s;
+  }
+
+  .perm-item:hover { border-color: var(--accent); }
+
+  .perm-item.granted { border-color: var(--green); background: rgba(63,185,80,0.05); }
+  .perm-item.denied  { border-color: var(--red);   background: rgba(248,81,73,0.05);  }
+  .perm-item.prompt  { border-color: var(--yellow); background: rgba(210,153,34,0.05); }
+
+  .perm-name {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text);
+  }
+
+  .perm-android {
+    font-size: 10px;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+
+  .perm-status {
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 7px;
+    border-radius: 20px;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .perm-status.idle    { background: #21262d; color: var(--muted); }
+  .perm-status.granted { background: rgba(63,185,80,0.15); color: var(--green); }
+  .perm-status.denied  { background: rgba(248,81,73,0.15); color: var(--red); }
+  .perm-status.prompt  { background: rgba(210,153,34,0.15); color: var(--yellow); }
+  .perm-status.testing { background: rgba(88,166,255,0.15); color: var(--accent); }
+
+  /* Audio player */
+  .audio-block {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .player-bar {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .play-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--accent);
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 18px;
+    transition: transform 0.1s;
+  }
+
+  .play-btn:hover { transform: scale(1.07); }
+  .play-btn:active { transform: scale(0.95); }
+
+  .station-info { flex: 1; overflow: hidden; }
+  .station-name { font-size: 13px; font-weight: 600; color: var(--text); }
+  .station-url  { font-size: 11px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+  .audio-status {
+    font-size: 12px;
+    padding: 6px 12px;
+    border-radius: 6px;
+    text-align: center;
+  }
+
+  .audio-status.idle    { background: #21262d; color: var(--muted); }
+  .audio-status.loading { background: rgba(88,166,255,0.1); color: var(--accent); }
+  .audio-status.playing { background: rgba(63,185,80,0.1); color: var(--green); }
+  .audio-status.error   { background: rgba(248,81,73,0.1); color: var(--red); }
+
+  audio { width: 100%; border-radius: 6px; }
+
+  /* Sensor / info blocks */
+  .info-box {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 10px 14px;
+    font-size: 12px;
+    color: var(--muted);
+    font-family: 'Courier New', monospace;
+    min-height: 36px;
+    white-space: pre-wrap;
+    word-break: break-all;
+  }
+
+  /* Buttons */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: opacity 0.15s;
+  }
+
+  .btn:hover { opacity: 0.85; }
+  .btn:active { opacity: 0.7; }
+  .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  .btn-primary { background: var(--accent); color: #0d1117; }
+  .btn-ghost   { background: #21262d; color: var(--text); border: 1px solid var(--border); }
+  .btn-danger  { background: var(--red); color: #fff; }
+
+  .btn-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 10px;
+  }
+
+  /* Summary bar */
+  .summary {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+
+  .summary-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px;
+    text-align: center;
+  }
+
+  .summary-card .num {
+    font-size: 26px;
+    font-weight: 700;
+    display: block;
+    line-height: 1;
+  }
+
+  .summary-card .label {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+
+  .num-green  { color: var(--green); }
+  .num-red    { color: var(--red); }
+  .num-yellow { color: var(--yellow); }
+
+  /* Log */
+  .log {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 10px 14px;
+    font-family: 'Courier New', monospace;
+    font-size: 11px;
+    height: 180px;
+    overflow-y: auto;
+    color: var(--muted);
+  }
+
+  .log-line { padding: 2px 0; border-bottom: 1px solid #1e252e; }
+  .log-line.ok  { color: var(--green); }
+  .log-line.err { color: var(--red); }
+  .log-line.inf { color: var(--accent); }
+
+  .divider {
+    height: 1px;
+    background: var(--border);
+    margin: 16px 0;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🏗️ InteeBuild</h1>
+  <p>Test de permisos del navegador / WebView</p>
+  <span class="badge">Aqua Studio · Droncito</span>
+</header>
+
+<!-- Summary -->
+<div class="summary">
+  <div class="summary-card">
+    <span class="num num-green" id="cnt-granted">0</span>
+    <div class="label">Concedidos</div>
+  </div>
+  <div class="summary-card">
+    <span class="num num-red" id="cnt-denied">0</span>
+    <div class="label">Denegados</div>
+  </div>
+  <div class="summary-card">
+    <span class="num num-yellow" id="cnt-pending">18</span>
+    <div class="label">Sin probar</div>
+  </div>
+</div>
+
+<!-- AUDIO -->
+<div class="section">
+  <div class="section-header">
+    <span class="icon">🎵</span> Audio / Micrófono
+  </div>
+  <div class="section-body">
+    <div class="audio-block">
+
+      <!-- Stream de Zeno.fm -->
+      <div class="player-bar">
+        <button class="play-btn" id="playBtn" onclick="toggleAudio()">▶</button>
+        <div class="station-info">
+          <div class="station-name">📻 Zeno.fm — Stream</div>
+          <div class="station-url">stream-154.zeno.fm/uurkc2b5u0hvv</div>
+        </div>
+      </div>
+
+      <audio id="radioAudio" preload="none" crossorigin="anonymous">
+        <source src="https://stream-154.zeno.fm/uurkc2b5u0hvv?zt=eyJhbGciOiJIUzI1NiJ9.eyJzdHJlYW0iOiJ1dXJrYzJiNXUwaHZ2IiwiaG9zdCI6InN0cmVhbS0xNTQuemVuby5mbSIsInJ0dGwiOjUsImp0aSI6Ikhva3NhTU1GUmdtYkNXU3psODJma1EiLCJpYXQiOjE3MzY0NzkxNTIsImV4cCI6MTczNjQ3OTIxMn0.-IJTyutvzFpXXz10SQLDTFtIEsf7JSs_IwvYQNsfyfQ" type="audio/mpeg">
+      </audio>
+
+      <div class="audio-status idle" id="audioStatus">
+        Presiona ▶ para probar el stream
+      </div>
+
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="testMicPermission()">🎤 Probar Micrófono</button>
+        <button class="btn btn-ghost" onclick="testAudioOutput()">🔊 Probar AudioContext</button>
+      </div>
+
+      <div class="info-box" id="audioInfo">Esperando prueba de audio…</div>
+    </div>
+  </div>
+</div>
+
+<!-- PERMISOS API navigator.permissions -->
+<div class="section">
+  <div class="section-header">
+    <span class="icon">🔐</span> Permisos del Navegador
+  </div>
+  <div class="section-body">
+    <div class="btn-row" style="margin-top:0;margin-bottom:14px;">
+      <button class="btn btn-primary" onclick="testAllPermissions()">⚡ Probar todos</button>
+      <button class="btn btn-ghost" onclick="resetAll()">↺ Reiniciar</button>
+    </div>
+    <div class="perm-grid" id="permGrid"></div>
+  </div>
+</div>
+
+<!-- CÁMARA -->
+<div class="section">
+  <div class="section-header"><span class="icon">📷</span> Cámara</div>
+  <div class="section-body">
+    <div class="btn-row" style="margin-top:0;">
+      <button class="btn btn-primary" onclick="testCamera()">Abrir cámara</button>
+      <button class="btn btn-ghost" onclick="stopCamera()">Detener</button>
+    </div>
+    <video id="cameraPreview" autoplay muted playsinline style="width:100%;max-height:220px;border-radius:6px;background:#000;margin-top:12px;display:none;"></video>
+    <div class="info-box" id="cameraInfo" style="margin-top:8px;">Sin prueba</div>
+  </div>
+</div>
+
+<!-- GPS -->
+<div class="section">
+  <div class="section-header"><span class="icon">📍</span> GPS / Ubicación</div>
+  <div class="section-body">
+    <div class="btn-row" style="margin-top:0;">
+      <button class="btn btn-primary" onclick="testGPS()">Obtener ubicación</button>
+      <button class="btn btn-ghost" onclick="testGPSWatch()">Seguimiento continuo</button>
+    </div>
+    <div class="info-box" id="gpsInfo" style="margin-top:10px;">Sin prueba</div>
+  </div>
+</div>
+
+<!-- NOTIFICACIONES -->
+<div class="section">
+  <div class="section-header"><span class="icon">🔔</span> Notificaciones</div>
+  <div class="section-body">
+    <div class="btn-row" style="margin-top:0;">
+      <button class="btn btn-primary" onclick="testNotification()">Pedir permiso + enviar</button>
+    </div>
+    <div class="info-box" id="notifInfo" style="margin-top:10px;">Sin prueba</div>
+  </div>
+</div>
+
+<!-- CLIPBOARD / ALMACENAMIENTO -->
+<div class="section">
+  <div class="section-header"><span class="icon">📋</span> Portapapeles / Storage</div>
+  <div class="section-body">
+    <div class="btn-row" style="margin-top:0;">
+      <button class="btn btn-primary" onclick="testClipboard()">Leer portapapeles</button>
+      <button class="btn btn-ghost" onclick="testStorage()">LocalStorage / IndexedDB</button>
+    </div>
+    <div class="info-box" id="clipInfo" style="margin-top:10px;">Sin prueba</div>
+  </div>
+</div>
+
+<!-- SENSORES -->
+<div class="section">
+  <div class="section-header"><span class="icon">📱</span> Sensores</div>
+  <div class="section-body">
+    <div class="btn-row" style="margin-top:0;">
+      <button class="btn btn-primary" onclick="testMotion()">Acelerómetro / Giroscopio</button>
+      <button class="btn btn-ghost" onclick="testOrientation()">Orientación</button>
+      <button class="btn btn-ghost" onclick="testVibrate()">Vibración</button>
+    </div>
+    <div class="info-box" id="sensorInfo" style="margin-top:10px;">Sin prueba</div>
+  </div>
+</div>
+
+<!-- BLUETOOTH -->
+<div class="section">
+  <div class="section-header"><span class="icon">🔵</span> Bluetooth / NFC</div>
+  <div class="section-body">
+    <div class="btn-row" style="margin-top:0;">
+      <button class="btn btn-primary" onclick="testBluetooth()">Escanear Bluetooth</button>
+      <button class="btn btn-ghost" onclick="testNFC()">Probar NFC</button>
+    </div>
+    <div class="info-box" id="btInfo" style="margin-top:10px;">Sin prueba</div>
+  </div>
+</div>
+
+<!-- PANTALLA / WAKELOCK -->
+<div class="section">
+  <div class="section-header"><span class="icon">💡</span> Pantalla / Wake Lock</div>
+  <div class="section-body">
+    <div class="btn-row" style="margin-top:0;">
+      <button class="btn btn-primary" onclick="testWakeLock()">Bloquear pantalla activa</button>
+      <button class="btn btn-ghost" onclick="testFullscreen()">Pantalla completa</button>
+      <button class="btn btn-ghost" onclick="testScreenOrientation()">Bloquear orientación</button>
+    </div>
+    <div class="info-box" id="screenInfo" style="margin-top:10px;">Sin prueba</div>
+  </div>
+</div>
+
+<!-- INFO DEL DISPOSITIVO -->
+<div class="section">
+  <div class="section-header"><span class="icon">📟</span> Info del Dispositivo / Red</div>
+  <div class="section-body">
+    <div class="btn-row" style="margin-top:0;">
+      <button class="btn btn-primary" onclick="showDeviceInfo()">Ver info</button>
+      <button class="btn btn-ghost" onclick="testNetwork()">Estado de red</button>
+    </div>
+    <div class="info-box" id="deviceInfo" style="margin-top:10px;">Sin prueba</div>
+  </div>
+</div>
+
+<!-- LOG -->
+<div class="section">
+  <div class="section-header"><span class="icon">📝</span> Log de eventos</div>
+  <div class="section-body" style="padding-bottom:12px;">
+    <div class="log" id="eventLog"></div>
+    <div class="btn-row">
+      <button class="btn btn-ghost" onclick="clearLog()">Limpiar log</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── Permisos a testear con navigator.permissions ─────────────────────────────
+const PERM_LIST = [
+  { id:'microphone',        label:'Micrófono',          android:'RECORD_AUDIO' },
+  { id:'camera',            label:'Cámara',             android:'CAMERA' },
+  { id:'geolocation',       label:'Ubicación fina',     android:'ACCESS_FINE_LOCATION' },
+  { id:'notifications',     label:'Notificaciones',     android:'POST_NOTIFICATIONS' },
+  { id:'push',              label:'Push',               android:'POST_NOTIFICATIONS' },
+  { id:'midi',              label:'MIDI',               android:'—' },
+  { id:'clipboard-read',    label:'Portapapeles (leer)',android:'—' },
+  { id:'clipboard-write',   label:'Portapapeles (esc)',android:'—' },
+  { id:'payment-handler',   label:'Payment Handler',    android:'—' },
+  { id:'screen-wake-lock',  label:'Wake Lock',          android:'WAKE_LOCK' },
+  { id:'persistent-storage',label:'Almac. persistente', android:'READ_EXTERNAL_STORAGE' },
+  { id:'storage-access',    label:'Acceso storage',     android:'READ_MEDIA_IMAGES' },
+  { id:'window-management', label:'Multi-ventana',      android:'SYSTEM_ALERT_WINDOW' },
+  { id:'accelerometer',     label:'Acelerómetro',       android:'BODY_SENSORS' },
+  { id:'gyroscope',         label:'Giroscopio',         android:'BODY_SENSORS' },
+  { id:'magnetometer',      label:'Magnetómetro',       android:'—' },
+  { id:'ambient-light-sensor',label:'Luz ambiental',   android:'—' },
+  { id:'background-fetch',  label:'Background Fetch',   android:'FOREGROUND_SERVICE' },
+];
+
+let permStates = {};
+let gpsWatcher = null;
+let wakeLock = null;
+let audioEl = document.getElementById('radioAudio');
+let isPlaying = false;
+
+// ── Build permission grid ─────────────────────────────────────────────────────
+function buildGrid() {
+  const grid = document.getElementById('permGrid');
+  grid.innerHTML = '';
+  PERM_LIST.forEach(p => {
+    permStates[p.id] = 'idle';
+    const div = document.createElement('div');
+    div.className = 'perm-item';
+    div.id = 'perm-' + p.id;
+    div.onclick = () => checkSinglePerm(p.id);
+    div.innerHTML = `
+      <div>
+        <div class="perm-name">${p.label}</div>
+        <div class="perm-android">${p.android}</div>
+      </div>
+      <span class="perm-status idle" id="ps-${p.id}">—</span>
+    `;
+    grid.appendChild(div);
+  });
+}
+
+function setPermState(id, state) {
+  const item = document.getElementById('perm-' + id);
+  const badge = document.getElementById('ps-' + id);
+  if (!item || !badge) return;
+  permStates[id] = state;
+  item.className = 'perm-item ' + (state !== 'idle' ? state : '');
+  badge.className = 'perm-status ' + state;
+  const labels = { idle:'—', granted:'✓ OK', denied:'✗ NO', prompt:'? Pedir', testing:'…' };
+  badge.textContent = labels[state] || state;
+  updateSummary();
+}
+
+function updateSummary() {
+  const vals = Object.values(permStates);
+  document.getElementById('cnt-granted').textContent = vals.filter(v=>v==='granted').length;
+  document.getElementById('cnt-denied').textContent  = vals.filter(v=>v==='denied').length;
+  document.getElementById('cnt-pending').textContent = vals.filter(v=>v==='idle'||v==='testing').length;
+}
+
+async function checkSinglePerm(id) {
+  setPermState(id, 'testing');
+  log(`Chequeando: ${id}`, 'inf');
+  try {
+    const r = await navigator.permissions.query({ name: id });
+    setPermState(id, r.state === 'granted' ? 'granted' : r.state === 'denied' ? 'denied' : 'prompt');
+    log(`${id} → ${r.state}`, r.state === 'granted' ? 'ok' : 'err');
+  } catch(e) {
+    setPermState(id, 'denied');
+    log(`${id} → No soportado (${e.message})`, 'err');
+  }
+}
+
+async function testAllPermissions() {
+  log('=== Iniciando prueba de todos los permisos ===', 'inf');
+  for (const p of PERM_LIST) {
+    await checkSinglePerm(p.id);
+    await delay(80);
+  }
+  log('=== Prueba completada ===', 'inf');
+}
+
+function resetAll() {
+  PERM_LIST.forEach(p => setPermState(p.id, 'idle'));
+  log('Estados reiniciados', 'inf');
+}
+
+// ── Audio ─────────────────────────────────────────────────────────────────────
+function setAudioStatus(msg, cls) {
+  const s = document.getElementById('audioStatus');
+  s.className = 'audio-status ' + cls;
+  s.textContent = msg;
+}
+
+function toggleAudio() {
+  if (isPlaying) {
+    audioEl.pause();
+    audioEl.src = '';
+    isPlaying = false;
+    document.getElementById('playBtn').textContent = '▶';
+    setAudioStatus('Stream detenido', 'idle');
+    log('Audio detenido', 'inf');
+  } else {
+    // Token del stream expira, solo puede probar si el stream sigue activo
+    const src = 'https://stream-154.zeno.fm/uurkc2b5u0hvv?zt=eyJhbGciOiJIUzI1NiJ9.eyJzdHJlYW0iOiJ1dXJrYzJiNXUwaHZ2IiwiaG9zdCI6InN0cmVhbS0xNTQuemVuby5mbSIsInJ0dGwiOjUsImp0aSI6Ikhva3NhTU1GUmdtYkNXU3psODJma1EiLCJpYXQiOjE3MzY0NzkxNTIsImV4cCI6MTczNjQ3OTIxMn0.-IJTyutvzFpXXz10SQLDTFtIEsf7JSs_IwvYQNsfyfQ';
+    audioEl.src = src;
+    setAudioStatus('⏳ Conectando al stream…', 'loading');
+    log('Intentando conectar al stream de Zeno.fm…', 'inf');
+    audioEl.load();
+    audioEl.play()
+      .then(() => {
+        isPlaying = true;
+        document.getElementById('playBtn').textContent = '⏸';
+        setAudioStatus('🎵 Stream reproduciéndose', 'playing');
+        log('Audio OK — stream activo', 'ok');
+        document.getElementById('audioInfo').textContent = `✓ Audio element puede reproducir streams HTTP.\nSrc: ${src.substring(0,60)}…`;
+      })
+      .catch(e => {
+        setAudioStatus('❌ Error: ' + e.message, 'error');
+        log('Error de audio: ' + e.message, 'err');
+        document.getElementById('audioInfo').textContent = `Error: ${e.message}\n\nNota: el token JWT del stream puede haber expirado (tiene TTL de 60s). En APK, usar stream sin token o con token fresco.`;
+      });
+  }
+}
+
+audioEl.addEventListener('error', () => {
+  const err = audioEl.error;
+  const msgs = { 1:'Abortado', 2:'Error de red', 3:'Error de decodificación', 4:'Fuente no soportada' };
+  const msg = err ? (msgs[err.code] || 'Desconocido') : 'Desconocido';
+  setAudioStatus('❌ Error de stream: ' + msg, 'error');
+  log('Error MediaError code=' + (err?.code) + ': ' + msg, 'err');
+  isPlaying = false;
+  document.getElementById('playBtn').textContent = '▶';
+});
+
+async function testMicPermission() {
+  log('Solicitando acceso al micrófono…', 'inf');
+  document.getElementById('audioInfo').textContent = 'Solicitando micrófono…';
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    const tracks = stream.getAudioTracks();
+    setPermState('microphone', 'granted');
+    document.getElementById('audioInfo').textContent = `✓ Micrófono concedido\nPistas de audio: ${tracks.length}\nLabel: ${tracks[0]?.label || '(sin label)'}\nConstraints: ${JSON.stringify(tracks[0]?.getSettings(), null, 2)}`;
+    log('Micrófono: acceso concedido', 'ok');
+    tracks.forEach(t => t.stop());
+  } catch(e) {
+    setPermState('microphone', 'denied');
+    document.getElementById('audioInfo').textContent = `✗ Micrófono denegado: ${e.message}`;
+    log('Micrófono: ' + e.message, 'err');
+  }
+}
+
+async function testAudioOutput() {
+  log('Probando AudioContext…', 'inf');
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = ctx.createOscillator();
+    osc.connect(ctx.destination);
+    osc.frequency.value = 440;
+    osc.start();
+    osc.stop(ctx.currentTime + 0.3);
+    await delay(400);
+    ctx.close();
+    document.getElementById('audioInfo').textContent = `✓ AudioContext OK\nSampleRate: ${ctx.sampleRate} Hz\nState: ${ctx.state}\nBaseLatency: ${ctx.baseLatency?.toFixed(4) || '—'}`;
+    log('AudioContext: OK (440Hz)', 'ok');
+  } catch(e) {
+    document.getElementById('audioInfo').textContent = `✗ AudioContext: ${e.message}`;
+    log('AudioContext: ' + e.message, 'err');
+  }
+}
+
+// ── Cámara ────────────────────────────────────────────────────────────────────
+let cameraStream = null;
+async function testCamera() {
+  log('Solicitando acceso a la cámara…', 'inf');
+  try {
+    cameraStream = await navigator.mediaDevices.getUserMedia({ video: true });
+    const vid = document.getElementById('cameraPreview');
+    vid.srcObject = cameraStream;
+    vid.style.display = 'block';
+    setPermState('camera', 'granted');
+    const track = cameraStream.getVideoTracks()[0];
+    document.getElementById('cameraInfo').textContent = `✓ Cámara activa\nLabel: ${track.label}\nSettings: ${JSON.stringify(track.getSettings(), null, 2)}`;
+    log('Cámara: acceso concedido', 'ok');
+  } catch(e) {
+    setPermState('camera', 'denied');
+    document.getElementById('cameraInfo').textContent = `✗ Cámara: ${e.message}`;
+    log('Cámara: ' + e.message, 'err');
+  }
+}
+
+function stopCamera() {
+  if (cameraStream) {
+    cameraStream.getTracks().forEach(t => t.stop());
+    document.getElementById('cameraPreview').style.display = 'none';
+    document.getElementById('cameraInfo').textContent = 'Cámara detenida.';
+    log('Cámara detenida', 'inf');
+  }
+}
+
+// ── GPS ───────────────────────────────────────────────────────────────────────
+function testGPS() {
+  log('Solicitando ubicación…', 'inf');
+  document.getElementById('gpsInfo').textContent = 'Obteniendo posición…';
+  if (!navigator.geolocation) {
+    document.getElementById('gpsInfo').textContent = '✗ Geolocation no disponible';
+    return;
+  }
+  navigator.geolocation.getCurrentPosition(
+    pos => {
+      setPermState('geolocation', 'granted');
+      document.getElementById('gpsInfo').textContent =
+        `✓ Ubicación OK\nLat: ${pos.coords.latitude.toFixed(6)}\nLon: ${pos.coords.longitude.toFixed(6)}\nPrecisión: ${pos.coords.accuracy?.toFixed(1)}m\nAltitud: ${pos.coords.altitude ?? '—'}\nVelocidad: ${pos.coords.speed ?? '—'}`;
+      log(`GPS: ${pos.coords.latitude.toFixed(4)}, ${pos.coords.longitude.toFixed(4)}`, 'ok');
+    },
+    err => {
+      setPermState('geolocation', 'denied');
+      document.getElementById('gpsInfo').textContent = `✗ GPS Error: ${err.message}`;
+      log('GPS: ' + err.message, 'err');
+    },
+    { enableHighAccuracy: true, timeout: 10000 }
+  );
+}
+
+function testGPSWatch() {
+  if (gpsWatcher !== null) {
+    navigator.geolocation.clearWatch(gpsWatcher);
+    gpsWatcher = null;
+    log('Seguimiento GPS detenido', 'inf');
+    return;
+  }
+  log('Iniciando seguimiento GPS continuo…', 'inf');
+  gpsWatcher = navigator.geolocation.watchPosition(
+    pos => {
+      document.getElementById('gpsInfo').textContent =
+        `📡 Seguimiento activo\nLat: ${pos.coords.latitude.toFixed(6)}\nLon: ${pos.coords.longitude.toFixed(6)}\nPrecisión: ${pos.coords.accuracy?.toFixed(1)}m`;
+    },
+    err => log('GPS watch: ' + err.message, 'err'),
+    { enableHighAccuracy: true }
+  );
+}
+
+// ── Notificaciones ────────────────────────────────────────────────────────────
+async function testNotification() {
+  log('Solicitando permiso de notificación…', 'inf');
+  if (!('Notification' in window)) {
+    document.getElementById('notifInfo').textContent = '✗ Notification API no disponible';
+    return;
+  }
+  try {
+    const perm = await Notification.requestPermission();
+    setPermState('notifications', perm === 'granted' ? 'granted' : 'denied');
+    document.getElementById('notifInfo').textContent = `Permiso: ${perm}`;
+    log('Notificación: ' + perm, perm === 'granted' ? 'ok' : 'err');
+    if (perm === 'granted') {
+      new Notification('InteeBuild ✓', {
+        body: 'Notificaciones funcionando en este WebView.',
+        icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><text y="28" font-size="28">🏗️</text></svg>'
+      });
+    }
+  } catch(e) {
+    document.getElementById('notifInfo').textContent = `✗ ${e.message}`;
+    log('Notificación: ' + e.message, 'err');
+  }
+}
+
+// ── Portapapeles ──────────────────────────────────────────────────────────────
+async function testClipboard() {
+  log('Leyendo portapapeles…', 'inf');
+  try {
+    const text = await navigator.clipboard.readText();
+    setPermState('clipboard-read', 'granted');
+    document.getElementById('clipInfo').textContent = `✓ Portapapeles OK\nContenido: "${text.substring(0,80)}…"`;
+    log('Clipboard read: OK', 'ok');
+  } catch(e) {
+    setPermState('clipboard-read', 'denied');
+    document.getElementById('clipInfo').textContent = `✗ Portapapeles: ${e.message}\n(puede requerir gesto del usuario o HTTPS)`;
+    log('Clipboard: ' + e.message, 'err');
+  }
+}
+
+function testStorage() {
+  try {
+    localStorage.setItem('intee_test', Date.now());
+    const val = localStorage.getItem('intee_test');
+    const quota = navigator.storage?.estimate ? 'disponible' : 'no disponible';
+    document.getElementById('clipInfo').textContent =
+      `✓ LocalStorage: OK (valor guardado: ${val})\nStorageEstimate API: ${quota}\nSessionStorage: ${typeof sessionStorage !== 'undefined' ? 'OK' : 'NO'}\nIndexedDB: ${typeof indexedDB !== 'undefined' ? 'OK' : 'NO'}\nCookies habilitadas: ${navigator.cookieEnabled}`;
+    log('Storage: OK', 'ok');
+    navigator.storage?.estimate().then(e => {
+      document.getElementById('clipInfo').textContent +=
+        `\nQuota: ${(e.quota/1024/1024).toFixed(1)} MB\nUsado: ${(e.usage/1024/1024).toFixed(2)} MB`;
+    });
+  } catch(e) {
+    document.getElementById('clipInfo').textContent = `✗ Storage: ${e.message}`;
+    log('Storage: ' + e.message, 'err');
+  }
+}
+
+// ── Sensores ──────────────────────────────────────────────────────────────────
+let motionListener = null;
+function testMotion() {
+  log('Solicitando sensores de movimiento…', 'inf');
+  if (!('DeviceMotionEvent' in window)) {
+    document.getElementById('sensorInfo').textContent = '✗ DeviceMotionEvent no disponible';
+    return;
+  }
+  if (typeof DeviceMotionEvent.requestPermission === 'function') {
+    DeviceMotionEvent.requestPermission().then(perm => {
+      if (perm === 'granted') listenMotion();
+      else {
+        document.getElementById('sensorInfo').textContent = '✗ Permiso de movimiento denegado';
+        log('Motion: denegado', 'err');
+      }
+    }).catch(e => log('Motion request: ' + e.message, 'err'));
+  } else {
+    listenMotion();
+  }
+}
+
+function listenMotion() {
+  if (motionListener) window.removeEventListener('devicemotion', motionListener);
+  let count = 0;
+  motionListener = (e) => {
+    count++;
+    if (count > 5) { window.removeEventListener('devicemotion', motionListener); return; }
+    const a = e.acceleration;
+    document.getElementById('sensorInfo').textContent =
+      `✓ DeviceMotion activo (muestra ${count}/5)\nAceleración X: ${a?.x?.toFixed(3) ?? '—'}\nY: ${a?.y?.toFixed(3) ?? '—'}\nZ: ${a?.z?.toFixed(3) ?? '—'}\nInterval: ${e.interval}ms`;
+  };
+  window.addEventListener('devicemotion', motionListener);
+  log('DeviceMotion: escuchando', 'ok');
+}
+
+function testOrientation() {
+  if (!('DeviceOrientationEvent' in window)) {
+    document.getElementById('sensorInfo').textContent = '✗ DeviceOrientationEvent no disponible';
+    return;
+  }
+  let count = 0;
+  const handler = (e) => {
+    count++;
+    if (count > 3) { window.removeEventListener('deviceorientation', handler); return; }
+    document.getElementById('sensorInfo').textContent =
+      `✓ Orientación (muestra ${count}/3)\nAlpha (Z): ${e.alpha?.toFixed(1) ?? '—'}°\nBeta (X): ${e.beta?.toFixed(1) ?? '—'}°\nGamma (Y): ${e.gamma?.toFixed(1) ?? '—'}°\nAbsoluta: ${e.absolute}`;
+  };
+  window.addEventListener('deviceorientation', handler);
+  log('DeviceOrientation: escuchando', 'ok');
+}
+
+function testVibrate() {
+  if (!navigator.vibrate) {
+    document.getElementById('sensorInfo').textContent = '✗ Vibration API no disponible';
+    log('Vibración: no soportada', 'err');
+    return;
+  }
+  navigator.vibrate([200, 100, 200]);
+  document.getElementById('sensorInfo').textContent = '✓ Vibración activada (patrón 200-100-200ms)';
+  log('Vibración: OK', 'ok');
+}
+
+// ── Bluetooth / NFC ───────────────────────────────────────────────────────────
+async function testBluetooth() {
+  log('Solicitando Bluetooth…', 'inf');
+  if (!navigator.bluetooth) {
+    document.getElementById('btInfo').textContent = '✗ Web Bluetooth no disponible\n(requiere HTTPS + flag en WebView o Chrome)';
+    log('Bluetooth: API no disponible', 'err');
+    return;
+  }
+  try {
+    const device = await navigator.bluetooth.requestDevice({ acceptAllDevices: true });
+    document.getElementById('btInfo').textContent = `✓ Bluetooth OK\nDispositivo: ${device.name || '(sin nombre)'}\nID: ${device.id}`;
+    log('Bluetooth: dispositivo encontrado', 'ok');
+  } catch(e) {
+    document.getElementById('btInfo').textContent = `✗ Bluetooth: ${e.message}`;
+    log('Bluetooth: ' + e.message, 'err');
+  }
+}
+
+function testNFC() {
+  if (!('NDEFReader' in window)) {
+    document.getElementById('btInfo').textContent = '✗ NFC (NDEFReader) no disponible\n(requiere Android + Chrome con NFC habilitado)';
+    log('NFC: no disponible', 'err');
+    return;
+  }
+  const reader = new NDEFReader();
+  reader.scan().then(() => {
+    document.getElementById('btInfo').textContent = '✓ NFC escaneando… acerca un tag';
+    log('NFC: escaneando', 'ok');
+    reader.addEventListener('reading', ({ message }) => {
+      document.getElementById('btInfo').textContent = `✓ NFC tag leído\nRecords: ${message.records.length}`;
+      log('NFC: tag detectado', 'ok');
+    });
+  }).catch(e => {
+    document.getElementById('btInfo').textContent = `✗ NFC: ${e.message}`;
+    log('NFC: ' + e.message, 'err');
+  });
+}
+
+// ── Pantalla ──────────────────────────────────────────────────────────────────
+async function testWakeLock() {
+  if (!('wakeLock' in navigator)) {
+    document.getElementById('screenInfo').textContent = '✗ Screen Wake Lock no disponible';
+    log('WakeLock: no disponible', 'err');
+    return;
+  }
+  try {
+    if (wakeLock) {
+      await wakeLock.release();
+      wakeLock = null;
+      document.getElementById('screenInfo').textContent = 'Wake Lock liberado.';
+      log('WakeLock: liberado', 'ok');
+    } else {
+      wakeLock = await navigator.wakeLock.request('screen');
+      setPermState('screen-wake-lock', 'granted');
+      document.getElementById('screenInfo').textContent =
+        `✓ Wake Lock activo\nTipo: ${wakeLock.type}\nEstado: ${wakeLock.released ? 'liberado' : 'activo'}`;
+      log('WakeLock: activo', 'ok');
+    }
+  } catch(e) {
+    document.getElementById('screenInfo').textContent = `✗ WakeLock: ${e.message}`;
+    log('WakeLock: ' + e.message, 'err');
+  }
+}
+
+function testFullscreen() {
+  const el = document.documentElement;
+  if (!document.fullscreenElement) {
+    el.requestFullscreen?.() || el.webkitRequestFullscreen?.();
+    document.getElementById('screenInfo').textContent = '✓ Pantalla completa activada';
+    log('Fullscreen: OK', 'ok');
+  } else {
+    document.exitFullscreen?.();
+    document.getElementById('screenInfo').textContent = 'Pantalla completa desactivada.';
+  }
+}
+
+function testScreenOrientation() {
+  if (!screen.orientation?.lock) {
+    document.getElementById('screenInfo').textContent = '✗ screen.orientation.lock no disponible';
+    return;
+  }
+  screen.orientation.lock('portrait').then(() => {
+    document.getElementById('screenInfo').textContent = '✓ Orientación bloqueada en Portrait';
+    log('Orientación: bloqueada', 'ok');
+  }).catch(e => {
+    document.getElementById('screenInfo').textContent = `✗ Orientación: ${e.message}`;
+    log('Orientación: ' + e.message, 'err');
+  });
+}
+
+// ── Device Info ───────────────────────────────────────────────────────────────
+function showDeviceInfo() {
+  const info = {
+    userAgent: navigator.userAgent,
+    platform: navigator.platform || '—',
+    language: navigator.language,
+    cookiesEnabled: navigator.cookieEnabled,
+    onLine: navigator.onLine,
+    hardwareConcurrency: navigator.hardwareConcurrency,
+    maxTouchPoints: navigator.maxTouchPoints,
+    screenW: screen.width,
+    screenH: screen.height,
+    pixelRatio: window.devicePixelRatio,
+    memory: navigator.deviceMemory ? navigator.deviceMemory + ' GB' : '—',
+  };
+  document.getElementById('deviceInfo').textContent = JSON.stringify(info, null, 2);
+  log('Device info: obtenida', 'ok');
+}
+
+function testNetwork() {
+  const conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+  if (conn) {
+    document.getElementById('deviceInfo').textContent =
+      `✓ Network Info API\nTipo: ${conn.type || '—'}\nEffective: ${conn.effectiveType || '—'}\nDownlink: ${conn.downlink ?? '—'} Mbps\nRTT: ${conn.rtt ?? '—'} ms\nSaveData: ${conn.saveData}`;
+  } else {
+    document.getElementById('deviceInfo').textContent =
+      `Network Info API no disponible\nonLine: ${navigator.onLine}`;
+  }
+  log('Network info: ' + (conn ? 'OK' : 'no disponible'), conn ? 'ok' : 'err');
+}
+
+// ── Log ───────────────────────────────────────────────────────────────────────
+function log(msg, type='inf') {
+  const log = document.getElementById('eventLog');
+  const d = new Date();
+  const ts = d.toTimeString().substring(0,8);
+  const div = document.createElement('div');
+  div.className = 'log-line ' + (type||'');
+  div.textContent = `[${ts}] ${msg}`;
+  log.appendChild(div);
+  log.scrollTop = log.scrollHeight;
+}
+
+function clearLog() {
+  document.getElementById('eventLog').innerHTML = '';
+}
+
+function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+buildGrid();
+log('InteeBuild permission tester listo', 'inf');
+log(`Plataforma: ${navigator.platform || navigator.userAgent.substring(0,60)}`, 'inf');
+log(`HTTPS: ${location.protocol === 'https:' ? 'Sí' : 'No — algunos permisos requieren HTTPS'}`, location.protocol === 'https:' ? 'ok' : 'err');
+</script>
+</body>
+</html>
