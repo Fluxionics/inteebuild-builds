@@ -1,0 +1,19 @@
+{
+  "appId": "com.inteebuild.testinteev3",
+  "appName": "TEST INTEE V3",
+  "webDir": "www",
+  "server": {
+    "cleartext": true,
+    "androidScheme": "https"
+  },
+  "android": {
+    "allowMixedContent": true
+  },
+  "plugins": {
+    "StatusBar": {
+      "style": "LIGHT",
+      "backgroundColor": "#ffffff",
+      "overlaysWebView": true
+    }
+  }
+}
