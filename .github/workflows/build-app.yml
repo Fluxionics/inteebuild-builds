@@ -77,14 +77,68 @@ jobs:
       - name: Sync Capacitor
         run: npx cap sync android
 
+      - name: Configure custom signing
+        if: ${{ hashFiles('user-keystore.jks') != '' }}
+        run: |
+          cp user-keystore.jks android/app/release.jks
+          cp signing.properties android/key.properties
+
+      - name: Apply signing config
+        if: ${{ hashFiles('user-keystore.jks') != '' }}
+        working-directory: android/app
+        run: |
+          cat >> build.gradle <<'GRADLE'
+          def ksProps = new Properties()
+          def ksFile = file("../key.properties")
+          if (ksFile.exists()) ksProps.load(new FileInputStream(ksFile))
+          android {
+            signingConfigs {
+              release {
+                storeFile file("release.jks")
+                storePassword ksProps['storePassword']
+                keyAlias ksProps['keyAlias']
+                keyPassword ksProps['keyPassword']
+              }
+            }
+            buildTypes {
+              release {
+                signingConfig signingConfigs.release
+                minifyEnabled true
+                proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+              }
+            }
+          }
+          GRADLE
+
+      - name: Enable ProGuard obfuscation
+        run: |
+          cat > android/app/proguard-rules.pro <<'PRO'
+          -keep class com.getcapacitor.** { *; }
+          -keep class org.apache.cordova.** { *; }
+          -keep class android.webkit.** { *; }
+          -keepattributes *Annotation*
+          -dontwarn javax.annotation.**
+          -dontwarn sun.misc.Unsafe
+          PRO
+
       - name: Compile APK
         working-directory: android
         run: ./gradlew assembleDebug --no-daemon
+
+      - name: Compile Release APK
+        if: ${{ hashFiles('user-keystore.jks') != '' }}
+        working-directory: android
+        run: ./gradlew assembleRelease --no-daemon
 
       - name: Compile AAB
         if: ${{ github.event.inputs.outputType == 'aab' || github.event.inputs.outputType == 'both' }}
         working-directory: android
         run: ./gradlew bundleDebug --no-daemon
+
+      - name: Compile Release AAB
+        if: ${{ hashFiles('user-keystore.jks') != '' && (github.event.inputs.outputType == 'aab' || github.event.inputs.outputType == 'both') }}
+        working-directory: android
+        run: ./gradlew bundleRelease --no-daemon
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
@@ -93,10 +147,26 @@ jobs:
           path: android/app/build/outputs/apk/debug/*.apk
           if-no-files-found: error
 
+      - name: Upload Release APK
+        if: ${{ hashFiles('user-keystore.jks') != '' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: inteebuild-${{ github.event.inputs.id }}-release-apk
+          path: android/app/build/outputs/apk/release/*.apk
+          if-no-files-found: error
+
       - name: Upload AAB
         if: ${{ github.event.inputs.outputType == 'aab' || github.event.inputs.outputType == 'both' }}
         uses: actions/upload-artifact@v4
         with:
           name: inteebuild-${{ github.event.inputs.id }}-aab
           path: android/app/build/outputs/bundle/debug/*.aab
+          if-no-files-found: error
+
+      - name: Upload Release AAB
+        if: ${{ hashFiles('user-keystore.jks') != '' && (github.event.inputs.outputType == 'aab' || github.event.inputs.outputType == 'both') }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: inteebuild-${{ github.event.inputs.id }}-release-aab
+          path: android/app/build/outputs/bundle/release/*.aab
           if-no-files-found: error
