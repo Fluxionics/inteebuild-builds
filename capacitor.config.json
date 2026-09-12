@@ -1,0 +1,19 @@
+{
+  "appId": "elbueen.samaritano.v3",
+  "appName": "El Buen Samaritano",
+  "webDir": "www",
+  "server": {
+    "cleartext": true,
+    "androidScheme": "https"
+  },
+  "android": {
+    "allowMixedContent": true
+  },
+  "plugins": {
+    "StatusBar": {
+      "style": "LIGHT",
+      "backgroundColor": "#ffffff",
+      "overlaysWebView": false
+    }
+  }
+}
