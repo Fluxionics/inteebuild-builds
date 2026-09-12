@@ -1,0 +1,18 @@
+{
+  "name": "inteebuild-app",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "sync": "cap sync",
+    "build": "cap build android"
+  },
+  "dependencies": {
+    "@capacitor/cli": "^7.4.1",
+    "@capacitor/core": "^7.4.1",
+    "@capacitor/android": "^7.4.1",
+    "@capacitor/push-notifications": "^7.0.0",
+    "@capacitor/local-notifications": "^7.0.0",
+    "@capacitor/network": "^7.0.0",
+    "@capacitor/status-bar": "^7.0.0"
+  }
+}
