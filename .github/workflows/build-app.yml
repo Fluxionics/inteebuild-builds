@@ -82,6 +82,20 @@ jobs:
           echo "--- permisos aplicados ---"
           grep -o 'android:name="[^"]*"' android/app/src/main/AndroidManifest.xml
 
+      - name: Validate manifest XML
+        run: python3 -c "import xml.dom.minidom,sys;xml.dom.minidom.parse('android/app/src/main/AndroidManifest.xml');print('manifest XML OK')"
+
+      - name: Install background audio service
+        if: "hashFiles('RadioService.java') != ''"
+        run: |
+          PKG=$(node -p 'require("./build-config.json").packageName')
+          DST="android/app/src/main/java/$(echo $PKG | tr . /)"
+          mkdir -p "$DST"
+          cp RadioService.java "$DST/RadioService.java"
+          node patch-main-activity.js
+          echo "--- servicio instalado ---"
+          grep -c RadioService "$DST/MainActivity.java"
+
       - name: Apply app icon
         if: "hashFiles('app-icon.png') != ''"
         run: |
@@ -150,7 +164,7 @@ jobs:
         run: |
           cat > android/app/proguard-rules.pro <<'PRO'
           -keep class com.getcapacitor.** { *; }
-          -keep class org.apache.cordova.** { *; }
+          -keep class * extends android.app.Service { *; }
           -keep class android.webkit.** { *; }
           -keepattributes *Annotation*
           -dontwarn javax.annotation.**
