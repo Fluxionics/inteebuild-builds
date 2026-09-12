@@ -245,9 +245,23 @@ jobs:
         run: npx cap sync ios
 
       - name: Validate iOS build (simulador)
+        if: ${{ hashFiles('ios-cert.p12') == '' }}
         run: |
           cd ios/App
           xcodebuild -project App.xcodeproj -scheme App -sdk iphonesimulator -configuration Debug build CODE_SIGNING_ALLOWED=NO
 
       - name: Note App Store
-        run: echo 'Proyecto iOS validado. El IPA para App Store requiere firma Apple: abre ios/ en Xcode con tu cuenta de desarrollador.'
+        if: ${{ hashFiles('ios-cert.p12') == '' }}
+        run: echo 'Proyecto iOS validado. Para IPA instalable sube tu certificado .p12 + perfil .mobileprovision en el paso Firma.'
+
+      - name: Sign and export IPA
+        if: ${{ hashFiles('ios-cert.p12') != '' }}
+        run: node ios-sign.js
+
+      - name: Upload IPA
+        if: ${{ hashFiles('ios-cert.p12') != '' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: inteebuild-${{ github.event.inputs.id }}-ipa
+          path: /tmp/ib-export/*.ipa
+          if-no-files-found: error
