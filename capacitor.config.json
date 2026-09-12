@@ -1,0 +1,12 @@
+{
+  "appId": "com.inteebuild.bloxdio",
+  "appName": "bloxd.io",
+  "webDir": "www",
+  "server": {
+    "cleartext": true,
+    "androidScheme": "https"
+  },
+  "android": {
+    "allowMixedContent": true
+  }
+}
