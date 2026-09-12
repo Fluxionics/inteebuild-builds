@@ -8,6 +8,11 @@ on:
         type: string
       outputType:
         description: 'Output type (apk/aab/both)'
+      platform:
+        description: 'Platform (android/ios/both)'
+        required: false
+        type: string
+        default: 'android'
         required: false
         type: string
         default: 'apk'
@@ -50,7 +55,12 @@ jobs:
         run: npm install
 
       - name: Add Capacitor Android platform
+        if: ${{ github.event.inputs.platform != 'ios' }}
         run: npx cap add android
+
+      - name: Add Capacitor iOS platform
+        if: ${{ github.event.inputs.platform == 'ios' || github.event.inputs.platform == 'both' }}
+        run: npx cap add ios
 
       - name: Suppress compileSdk warning
         run: echo 'android.suppressUnsupportedCompileSdk=36' >> android/gradle.properties
@@ -75,7 +85,11 @@ jobs:
           done
 
       - name: Sync Capacitor
-        run: npx cap sync android
+        run: npx cap sync
+
+      - name: Note iOS
+        if: ${{ github.event.inputs.platform == 'ios' || github.event.inputs.platform == 'both' }}
+        run: echo 'iOS project generated in ios/ - compile requires macOS with Xcode'
 
       - name: Apply adaptive icon
         if: ${{ hashFiles('adaptive-foreground.png') != '' }}
