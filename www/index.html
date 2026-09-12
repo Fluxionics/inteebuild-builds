@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>El Buen Samaritano 106.5 FM</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --sky:        #1AB8F0;
+            --sky-deep:   #0E8EC4;
+            --sky-light:  #60D4F8;
+            --sky-pale:   #A8E9FF;
+            --sky-dim:    rgba(26,184,240,0.18);
+            --navy:       #04111C;
+            --navy-mid:   #071E30;
+            --card:       rgba(4,18,30,0.82);
+            --white:      #FFFFFF;
+            --white-70:   rgba(255,255,255,0.70);
+            --white-40:   rgba(255,255,255,0.40);
+            --white-15:   rgba(255,255,255,0.13);
+            --white-08:   rgba(255,255,255,0.07);
+            --green:      #22C55E;
+        }
+
+        body, html {
+            width: 100%; min-height: 100%;
+            font-family: 'Inter', sans-serif;
+            background: var(--navy);
+            display: flex; justify-content: center;
+            align-items: flex-start; overflow-x: hidden;
+        }
+
+        /* ── FONDO generado con CSS ── */
+        .bg {
+            position: fixed; inset: 0; z-index: 0;
+            /* base de cielo */
+            background: linear-gradient(180deg,
+                #0A2A42 0%,
+                #093D62 18%,
+                #0E6FA0 42%,
+                #1299CC 62%,
+                #07273D 100%);
+            overflow: hidden;
+        }
+
+        /* nubes suaves */
+        .bg::before {
+            content:'';
+            position:absolute; inset:0;
+            background:
+                radial-gradient(ellipse 120% 40% at 80% 18%, rgba(255,255,255,0.13) 0%, transparent 55%),
+                radial-gradient(ellipse 90% 30% at 10% 30%, rgba(255,255,255,0.10) 0%, transparent 50%),
+                radial-gradient(ellipse 70% 25% at 55% 55%, rgba(255,255,255,0.07) 0%, transparent 50%),
+                radial-gradient(ellipse 100% 20% at 30% 70%, rgba(255,255,255,0.06) 0%, transparent 50%);
+        }
+
+        /* destellos de luz celestial */
+        .bg::after {
+            content:'';
+            position:absolute; inset:0;
+            background:
+                radial-gradient(ellipse 60% 50% at 50% 0%,  rgba(26,184,240,0.25) 0%, transparent 65%),
+                radial-gradient(ellipse 40% 30% at 85% 25%, rgba(160,230,255,0.18) 0%, transparent 55%),
+                radial-gradient(ellipse 50% 60% at 50% 100%, rgba(4,18,30,0.95) 0%, transparent 70%);
+        }
+
+        /* rayos de luz animados */
+        .ray {
+            position:absolute;
+            top: -10%;
+            width: 2px;
+            height: 140%;
+            background: linear-gradient(to bottom, rgba(255,255,255,0.18), transparent);
+            transform-origin: top center;
+            animation: ray-sway 8s ease-in-out infinite;
+        }
+        .ray:nth-child(1){ left:20%; transform:rotate(-12deg); animation-delay:0s; opacity:.7; }
+        .ray:nth-child(2){ left:35%; transform:rotate(-6deg);  animation-delay:1.5s; opacity:.5; }
+        .ray:nth-child(3){ left:50%; transform:rotate(0deg);   animation-delay:0.8s; opacity:.8; }
+        .ray:nth-child(4){ left:65%; transform:rotate(6deg);   animation-delay:2s;   opacity:.5; }
+        .ray:nth-child(5){ left:78%; transform:rotate(12deg);  animation-delay:0.3s; opacity:.6; }
+        @keyframes ray-sway {
+            0%,100% { opacity:.4; transform:rotate(var(--r, 0deg)) scaleX(1); }
+            50%      { opacity:.9; transform:rotate(calc(var(--r, 0deg) + 3deg)) scaleX(1.5); }
+        }
+
+        /* degradado oscuro abajo para que la card destaque */
+        .bg-fade {
+            position:fixed; bottom:0; left:0; right:0; height:65%;
+            background: linear-gradient(to bottom, transparent 0%, rgba(4,18,30,0.97) 100%);
+            z-index:0;
+        }
+
+        /* ── WRAPPER ── */
+        .wrapper {
+            position:relative; z-index:1;
+            width:100%; max-width:420px;
+            padding:24px 16px 44px;
+            display:flex; flex-direction:column; align-items:center;
+        }
+
+        /* ── HERO ── */
+        .hero {
+            width:100%;
+            display:flex; flex-direction:column; align-items:center;
+            padding:32px 24px 26px;
+            background: var(--card);
+            backdrop-filter:blur(30px); -webkit-backdrop-filter:blur(30px);
+            border:1px solid rgba(26,184,240,0.30);
+            border-bottom:none;
+            border-radius:32px 32px 0 0;
+            position:relative;
+        }
+
+        .menu-btn {
+            position:absolute; top:14px; right:14px;
+            width:36px; height:36px; border-radius:50%;
+            background:var(--white-08); border:1px solid var(--white-15);
+            color:var(--white-40); font-size:1.2rem;
+            display:flex; align-items:center; justify-content:center;
+            cursor:pointer; line-height:1; transition:background .2s;
+        }
+        .menu-btn:active { background:var(--sky-dim); color:var(--sky); }
+
+        .live-pill {
+            display:flex; align-items:center; gap:7px;
+            background:rgba(34,197,94,0.12);
+            border:1px solid rgba(34,197,94,0.32);
+            border-radius:20px; padding:5px 14px 5px 10px;
+            font-size:.71rem; font-weight:700;
+            letter-spacing:1.3px; color:var(--green);
+            text-transform:uppercase; margin-bottom:20px;
+        }
+        .live-dot {
+            width:7px; height:7px; border-radius:50%;
+            background:var(--green); box-shadow:0 0 8px var(--green);
+            animation:pdot 1.4s ease-in-out infinite;
+        }
+        @keyframes pdot { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.45;transform:scale(.7)} }
+
+        /* Logo ring — azul cielo */
+        .logo-ring {
+            width:128px; height:128px; border-radius:50%; padding:3px;
+            background: conic-gradient(from 0deg, var(--sky-deep), var(--sky-light), var(--sky-pale), #0A6A95, var(--sky-deep));
+            box-shadow: 0 0 50px rgba(26,184,240,0.35), 0 14px 36px rgba(0,0,0,0.6);
+            margin-bottom:18px;
+            animation: spin-ring 10s linear infinite;
+        }
+        @keyframes spin-ring { to { transform:rotate(360deg); } }
+
+        .logo-inner {
+            width:100%; height:100%; border-radius:50%;
+            background:#061420; overflow:hidden;
+            display:flex; align-items:center; justify-content:center;
+        }
+        .logo-inner img { width:96%; height:96%; object-fit:contain; }
+
+        .station-name {
+            font-size:1.3rem; font-weight:900; color:var(--white);
+            letter-spacing:-.3px; text-align:center; line-height:1.15;
+        }
+        .station-freq {
+            font-size:.78rem; font-weight:700;
+            background:linear-gradient(90deg, var(--sky-deep), var(--sky-light));
+            -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+            letter-spacing:2.5px; text-transform:uppercase; margin-top:5px;
+        }
+        .station-sub {
+            font-size:.68rem; font-weight:500; color:var(--white-40);
+            letter-spacing:.5px; margin-top:4px; font-style:italic;
+        }
+
+        /* ── NOW PLAYING ── */
+        .now-card {
+            width:100%; background:var(--card);
+            backdrop-filter:blur(30px); -webkit-backdrop-filter:blur(30px);
+            border-left:1px solid rgba(26,184,240,0.24);
+            border-right:1px solid rgba(26,184,240,0.24);
+            padding:16px 22px;
+            display:flex; align-items:center; gap:14px;
+        }
+        .now-text { flex:1; min-width:0; }
+        .now-label {
+            font-size:.62rem; font-weight:700;
+            letter-spacing:1.6px; color:var(--sky);
+            text-transform:uppercase; margin-bottom:3px;
+        }
+        .now-title {
+            font-size:.88rem; font-weight:600; color:var(--white);
+            white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+        }
+        .visualizer {
+            display:flex; align-items:flex-end; gap:3px;
+            height:26px; flex-shrink:0;
+        }
+        .bar {
+            width:3px; height:4px;
+            background:linear-gradient(to top, var(--sky-deep), var(--sky-light));
+            border-radius:2px;
+        }
+        .playing .bar { animation:wv 1s ease-in-out infinite; }
+        .bar:nth-child(1){animation-delay:.00s} .bar:nth-child(2){animation-delay:.15s}
+        .bar:nth-child(3){animation-delay:.30s} .bar:nth-child(4){animation-delay:.10s}
+        .bar:nth-child(5){animation-delay:.25s} .bar:nth-child(6){animation-delay:.40s}
+        .bar:nth-child(7){animation-delay:.20s} .bar:nth-child(8){animation-delay:.35s}
+        @keyframes wv { 0%,100%{height:4px} 50%{height:22px} }
+
+        /* ── PLAY ── */
+        .play-section {
+            width:100%; background:var(--card);
+            backdrop-filter:blur(30px); -webkit-backdrop-filter:blur(30px);
+            border-left:1px solid rgba(26,184,240,0.24);
+            border-right:1px solid rgba(26,184,240,0.24);
+            padding:22px 28px;
+            display:flex; flex-direction:column; align-items:center; gap:18px;
+        }
+        .btn-play {
+            width:78px; height:78px; border-radius:50%; border:none;
+            background:linear-gradient(145deg, var(--sky-light), var(--sky-deep));
+            color:var(--white); font-size:1.65rem;
+            display:flex; align-items:center; justify-content:center;
+            cursor:pointer;
+            box-shadow:0 0 0 10px rgba(26,184,240,0.13), 0 12px 32px rgba(26,184,240,0.38);
+            transition:transform .15s, box-shadow .15s;
+        }
+        .btn-play:active { transform:scale(.91); box-shadow:0 0 0 5px rgba(26,184,240,0.10); }
+
+        .volume-row { width:100%; display:flex; align-items:center; gap:12px; }
+        .volume-row i { color:var(--white-40); font-size:.8rem; flex-shrink:0; }
+        .vol-track { flex:1; height:4px; background:var(--white-15); border-radius:4px; position:relative; cursor:pointer; }
+        .vol-fill { height:100%; background:linear-gradient(90deg, var(--sky-deep), var(--sky-light)); border-radius:4px; width:100%; pointer-events:none; }
+        input[type=range].vol-slider { position:absolute; inset:-8px 0; width:100%; opacity:0; cursor:pointer; height:20px; }
+
+        /* ── TIMER ── */
+        .timer-bar {
+            width:100%; background:var(--card);
+            backdrop-filter:blur(30px); -webkit-backdrop-filter:blur(30px);
+            border-left:1px solid rgba(26,184,240,0.24);
+            border-right:1px solid rgba(26,184,240,0.24);
+            padding:0 22px 18px;
+        }
+        .timer-trigger {
+            width:100%; background:var(--white-08);
+            border:1px solid var(--white-15); border-radius:14px;
+            padding:12px 16px; display:flex; align-items:center; gap:12px;
+            cursor:pointer; transition:background .2s;
+        }
+        .timer-trigger:active { background:var(--sky-dim); }
+        .timer-trigger i { color:var(--sky); font-size:.88rem; }
+        .timer-trigger-label { flex:1; font-size:.82rem; font-weight:600; color:var(--white-40); }
+        .timer-trigger-label span { color:var(--sky-light); }
+        .timer-arrow { color:var(--white-40); font-size:.7rem; transition:transform .2s; }
+        .timer-panel { overflow:hidden; max-height:0; transition:max-height .3s ease; }
+        .timer-panel.open { max-height:110px; }
+        .timer-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; padding-top:10px; }
+        .timer-opt {
+            background:var(--white-08); border:1px solid var(--white-15);
+            border-radius:10px; color:var(--white);
+            font-size:.74rem; font-weight:700; font-family:'Inter',sans-serif;
+            padding:10px 4px; text-align:center; cursor:pointer; transition:all .15s;
+        }
+        .timer-opt:active, .timer-opt.sel { background:var(--sky-dim); border-color:var(--sky); color:var(--sky-light); }
+
+        /* ── SOCIAL ── */
+        .social-section {
+            width:100%; background:var(--card);
+            backdrop-filter:blur(30px); -webkit-backdrop-filter:blur(30px);
+            border:1px solid rgba(26,184,240,0.24);
+            border-top:none; border-radius:0 0 32px 32px;
+            padding:18px 22px 28px;
+        }
+        .social-label {
+            font-size:.63rem; font-weight:700;
+            letter-spacing:1.6px; color:var(--white-40);
+            text-transform:uppercase; text-align:center; margin-bottom:14px;
+        }
+        .social-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:10px; }
+        .social-btn {
+            display:flex; flex-direction:column; align-items:center;
+            justify-content:center; gap:7px; padding:16px 8px;
+            border-radius:16px; text-decoration:none; border:1px solid;
+            cursor:pointer; transition:transform .15s, opacity .15s;
+            background:none; font-family:'Inter',sans-serif;
+        }
+        .social-btn:active { transform:scale(.92); opacity:.8; }
+        .social-btn i { font-size:1.3rem; }
+        .social-btn span { font-size:.62rem; font-weight:700; letter-spacing:.4px; text-transform:uppercase; }
+        .btn-wa   { background:rgba(37,209,102,0.12); border-color:rgba(37,209,102,0.30); color:#4ADE80; }
+        .btn-call { background:rgba(26,184,240,0.12); border-color:rgba(26,184,240,0.32); color:var(--sky-light); }
+
+        /* ── DRAWER ── */
+        .drawer-overlay {
+            position:fixed; inset:0; background:rgba(2,8,14,0.78);
+            backdrop-filter:blur(6px); z-index:200;
+            opacity:0; pointer-events:none; transition:opacity .25s;
+        }
+        .drawer-overlay.active { opacity:1; pointer-events:auto; }
+        .drawer {
+            position:fixed; bottom:0; left:0; right:0;
+            background:#060F18; border:1px solid rgba(26,184,240,0.22);
+            border-bottom:none; border-radius:28px 28px 0 0;
+            padding:12px 0 44px; transform:translateY(100%);
+            transition:transform .3s cubic-bezier(.34,1.1,.64,1);
+            z-index:201; max-width:420px; margin:0 auto;
+        }
+        .drawer-overlay.active .drawer { transform:translateY(0); }
+        .drawer-handle { width:36px; height:4px; background:var(--white-15); border-radius:2px; margin:0 auto 20px; }
+        .drawer-section-label {
+            font-size:.63rem; font-weight:700; letter-spacing:1.8px;
+            color:var(--white-40); text-transform:uppercase; padding:0 22px; margin-bottom:6px;
+        }
+        .drawer-item {
+            display:flex; align-items:center; gap:16px; padding:13px 22px;
+            cursor:pointer; transition:background .15s; text-decoration:none;
+            color:var(--white); border:none; background:none;
+            width:100%; font-family:'Inter',sans-serif; text-align:left;
+        }
+        .drawer-item:active { background:var(--white-08); }
+        .d-icon { width:38px; height:38px; border-radius:11px; display:flex; align-items:center; justify-content:center; font-size:1rem; flex-shrink:0; border:1px solid; }
+        .di-share { background:rgba(99,102,241,0.15); border-color:rgba(99,102,241,0.30); color:#A5B4FC; }
+        .di-priv  { background:rgba(34,197,94,0.12);  border-color:rgba(34,197,94,0.28);  color:#4ADE80; }
+        .di-terms { background:rgba(26,184,240,0.12); border-color:rgba(26,184,240,0.28); color:var(--sky-light); }
+        .di-about { background:rgba(26,184,240,0.10); border-color:rgba(26,184,240,0.25); color:var(--sky); }
+        .drawer-item-text strong { display:block; font-size:.87rem; font-weight:700; color:var(--white); margin-bottom:1px; }
+        .drawer-item-text small  { font-size:.68rem; color:var(--white-40); }
+        .drawer-divider { height:1px; background:var(--white-08); margin:6px 22px; }
+        .drawer-credits {
+            margin:14px 22px 0; background:var(--white-08);
+            border:1px solid var(--white-15); border-radius:14px; padding:14px 16px;
+            display:flex; align-items:center; gap:12px;
+        }
+        .drawer-credits-text strong { display:block; font-size:.77rem; font-weight:800; color:var(--sky-light); margin-bottom:2px; }
+        .drawer-credits-text span   { font-size:.67rem; color:var(--white-40); line-height:1.4; }
+
+        /* ── SHARE MODAL ── */
+        .share-overlay {
+            position:fixed; inset:0; background:rgba(2,8,14,0.80);
+            backdrop-filter:blur(8px); z-index:300;
+            display:flex; align-items:flex-end; justify-content:center;
+            opacity:0; pointer-events:none; transition:opacity .25s;
+        }
+        .share-overlay.active { opacity:1; pointer-events:auto; }
+        .share-box {
+            background:#060F18; border:1px solid rgba(26,184,240,0.22);
+            border-bottom:none; border-radius:28px 28px 0 0;
+            width:100%; max-width:420px; padding:12px 0 44px;
+            transform:translateY(40px);
+            transition:transform .3s cubic-bezier(.34,1.1,.64,1);
+        }
+        .share-overlay.active .share-box { transform:translateY(0); }
+        .share-handle { width:36px; height:4px; background:var(--white-15); border-radius:2px; margin:0 auto 16px; }
+        .share-title { font-size:.63rem; font-weight:700; letter-spacing:1.8px; color:var(--white-40); text-transform:uppercase; text-align:center; margin-bottom:18px; }
+        .share-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; padding:0 20px; margin-bottom:16px; }
+        .share-btn {
+            display:flex; flex-direction:column; align-items:center; gap:7px;
+            text-decoration:none; cursor:pointer; transition:transform .15s;
+            background:none; border:none; font-family:'Inter',sans-serif;
+        }
+        .share-btn:active { transform:scale(.87); }
+        .share-icon { width:52px; height:52px; border-radius:16px; display:flex; align-items:center; justify-content:center; font-size:1.3rem; border:1px solid; }
+        .share-btn span { font-size:.6rem; font-weight:700; color:var(--white-40); text-align:center; }
+        .si-wa  { background:rgba(37,209,102,0.13); border-color:rgba(37,209,102,0.30); color:#4ADE80; }
+        .si-tg  { background:rgba(38,159,215,0.13); border-color:rgba(38,159,215,0.30); color:#7DD3FC; }
+        .si-fb  { background:rgba(24,119,242,0.13); border-color:rgba(24,119,242,0.28); color:#60A5FA; }
+        .si-tw  { background:rgba(255,255,255,0.07); border-color:rgba(255,255,255,0.15); color:#fff; }
+        .si-sms { background:rgba(34,197,94,0.12);  border-color:rgba(34,197,94,0.28);  color:#86EFAC; }
+        .si-em  { background:rgba(26,184,240,0.12); border-color:rgba(26,184,240,0.28); color:var(--sky-light); }
+        .si-tt  { background:rgba(255,0,80,0.12);   border-color:rgba(255,0,80,0.26);   color:#FB7185; }
+        .si-ig  { background:rgba(225,48,108,0.12); border-color:rgba(225,48,108,0.26); color:#F472B6; }
+        .share-cancel {
+            display:block; width:calc(100% - 40px); margin:0 20px;
+            background:var(--white-08); border:1px solid var(--white-15);
+            border-radius:14px; color:var(--white-40); font-family:'Inter',sans-serif;
+            font-size:.82rem; font-weight:600; padding:13px; cursor:pointer; text-align:center;
+        }
+
+        /* ── LEGAL MODAL ── */
+        .legal-overlay {
+            position:fixed; inset:0; background:rgba(2,8,14,0.93);
+            backdrop-filter:blur(12px); z-index:300;
+            display:flex; align-items:flex-end; justify-content:center;
+            opacity:0; pointer-events:none; transition:opacity .25s;
+        }
+        .legal-overlay.active { opacity:1; pointer-events:auto; }
+        .legal-box {
+            background:#060F18; border:1px solid rgba(26,184,240,0.22);
+            border-bottom:none; border-radius:28px 28px 0 0;
+            width:100%; max-width:420px; max-height:82vh;
+            display:flex; flex-direction:column;
+            transform:translateY(40px);
+            transition:transform .3s cubic-bezier(.34,1.1,.64,1);
+        }
+        .legal-overlay.active .legal-box { transform:translateY(0); }
+        .legal-header {
+            display:flex; align-items:center; justify-content:space-between;
+            padding:18px 22px 14px; border-bottom:1px solid var(--white-08); flex-shrink:0;
+        }
+        .legal-header h3 { font-size:.95rem; font-weight:800; color:var(--white); }
+        .legal-close {
+            width:30px; height:30px; border-radius:50%; background:var(--white-08);
+            border:1px solid var(--white-15); color:var(--white-40);
+            font-size:.85rem; display:flex; align-items:center; justify-content:center; cursor:pointer;
+        }
+        .legal-body { overflow-y:auto; padding:18px 22px 40px; font-size:.8rem; color:rgba(255,255,255,.65); line-height:1.7; }
+        .legal-body h4 { font-size:.82rem; font-weight:700; color:var(--sky-light); margin:16px 0 6px; }
+        .legal-body h4:first-child { margin-top:0; }
+        .legal-body p { margin-bottom:8px; }
+    </style>
+</head>
+<body>
+
+    <!-- FONDO -->
+    <div class="bg">
+        <div class="ray"></div>
+        <div class="ray"></div>
+        <div class="ray"></div>
+        <div class="ray"></div>
+        <div class="ray"></div>
+    </div>
+    <div class="bg-fade"></div>
+
+    <div class="wrapper">
+
+        <!-- HERO -->
+        <div class="hero">
+            <button class="menu-btn" onclick="openDrawer()">⋮</button>
+            <div class="live-pill">
+                <div class="live-dot"></div>
+                En Vivo Ahora
+            </div>
+            <div class="logo-ring">
+                <div class="logo-inner">
+                    <img src="https://i.imgur.com/7VdRBDa.png" alt="El Buen Samaritano 106.5 FM">
+                </div>
+            </div>
+            <div class="station-name">El Buen Samaritano</div>
+            <div class="station-freq">106.5 FM · Radio Católica</div>
+            <div class="station-sub">"San Cristobal De Las Casas"</div>
+        </div>
+
+        <!-- NOW PLAYING -->
+        <div class="now-card">
+            <div class="now-text">
+                <div class="now-label">Transmisión en vivo</div>
+                <div class="now-title" id="nowTitle">Sintonizando…</div>
+            </div>
+            <div class="visualizer" id="viz">
+                <div class="bar"></div><div class="bar"></div><div class="bar"></div>
+                <div class="bar"></div><div class="bar"></div><div class="bar"></div>
+                <div class="bar"></div><div class="bar"></div>
+            </div>
+        </div>
+
+        <!-- PLAY + VOLUME -->
+        <div class="play-section">
+            <button class="btn-play" id="btnPlay">
+                <i class="fas fa-play" id="playIcon"></i>
+            </button>
+            <div class="volume-row">
+                <i class="fas fa-volume-off"></i>
+                <div class="vol-track">
+                    <div class="vol-fill" id="volFill"></div>
+                    <input type="range" class="vol-slider" id="volSlider" min="0" max="1" step="0.02" value="1">
+                </div>
+                <i class="fas fa-volume-high"></i>
+            </div>
+        </div>
+
+        <!-- TIMER -->
+        <div class="timer-bar">
+            <div class="timer-trigger" onclick="toggleTimer()">
+                <i class="fas fa-moon"></i>
+                <div class="timer-trigger-label" id="timerLabel">Apagado automático</div>
+                <i class="fas fa-chevron-down timer-arrow" id="timerArrow"></i>
+            </div>
+            <div class="timer-panel" id="timerPanel">
+                <div class="timer-grid">
+                    <button class="timer-opt" onclick="setSleep(5)">5 min</button>
+                    <button class="timer-opt" onclick="setSleep(15)">15 min</button>
+                    <button class="timer-opt" onclick="setSleep(30)">30 min</button>
+                    <button class="timer-opt" onclick="setSleep(60)">60 min</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- SOCIAL -->
+        <div class="social-section">
+            <div class="social-label">Conéctate con nosotros</div>
+            <div class="social-grid">
+                <a href="whatsapp://send?text=Hola vengo de la app&phone=+529673615945" class="social-btn btn-wa">
+                    <i class="fab fa-whatsapp"></i>
+                    <span>WhatsApp</span>
+                </a>
+                <a href="tel:9673615945" class="social-btn btn-call">
+                    <i class="fas fa-phone"></i>
+                    <span>Cabina</span>
+                </a>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- DRAWER -->
+    <div class="drawer-overlay" id="drawerOverlay" onclick="closeDrawerOut(event)">
+        <div class="drawer">
+            <div class="drawer-handle"></div>
+            <div class="drawer-section-label">Opciones</div>
+            <button class="drawer-item" onclick="shareApp()">
+                <div class="d-icon di-share"><i class="fas fa-share-nodes"></i></div>
+                <div class="drawer-item-text">
+                    <strong>Compartir App</strong>
+                    <small>Invita a tus amigos a escuchar</small>
+                </div>
+            </button>
+            <div class="drawer-divider"></div>
+            <div class="drawer-section-label" style="margin-top:8px">Legal</div>
+            <button class="drawer-item" onclick="openLegal('privacy')">
+                <div class="d-icon di-priv"><i class="fas fa-shield-halved"></i></div>
+                <div class="drawer-item-text"><strong>Política de Privacidad</strong><small>Cómo tratamos tus datos</small></div>
+            </button>
+            <button class="drawer-item" onclick="openLegal('terms')">
+                <div class="d-icon di-terms"><i class="fas fa-file-lines"></i></div>
+                <div class="drawer-item-text"><strong>Términos de Uso</strong><small>Condiciones del servicio</small></div>
+            </button>
+            <button class="drawer-item" onclick="openLegal('about')">
+                <div class="d-icon di-about"><i class="fas fa-circle-info"></i></div>
+                <div class="drawer-item-text"><strong>Acerca de</strong><small>Versión y créditos</small></div>
+            </button>
+            <div class="drawer-credits">
+                <div style="font-size:1.4rem;flex-shrink:0">📡</div>
+                <div class="drawer-credits-text">
+                    <strong>INTEE Broadcast y Tecnología</strong>
+                    <span>Desarrollo, transmisión y tecnología digital.<br>Todos los derechos reservados © 2025</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SHARE MODAL -->
+    <div class="share-overlay" id="shareOverlay" onclick="closeShareOut(event)">
+        <div class="share-box">
+            <div class="share-handle"></div>
+            <div class="share-title">Compartir con amigos</div>
+            <div class="share-grid" id="shareGrid"></div>
+            <button class="share-cancel" onclick="closeShare()">Cancelar</button>
+        </div>
+    </div>
+
+    <!-- LEGAL MODAL -->
+    <div class="legal-overlay" id="legalOverlay">
+        <div class="legal-box">
+            <div class="legal-header">
+                <h3 id="legalTitle"></h3>
+                <button class="legal-close" onclick="closeLegal()"><i class="fas fa-xmark"></i></button>
+            </div>
+            <div class="legal-body" id="legalBody"></div>
+        </div>
+    </div>
+
+    <audio id="audioPlayer" src="https://sp5.servidorrprivado.com:10958/sid=1" preload="auto"></audio>
+
+    <script>
+        const audio     = document.getElementById('audioPlayer');
+        const btnPlay   = document.getElementById('btnPlay');
+        const playIcon  = document.getElementById('playIcon');
+        const viz       = document.getElementById('viz');
+        const volSlider = document.getElementById('volSlider');
+        const volFill   = document.getElementById('volFill');
+        const timerLabel= document.getElementById('timerLabel');
+        const timerPanel= document.getElementById('timerPanel');
+        const timerArrow= document.getElementById('timerArrow');
+        const nowTitle  = document.getElementById('nowTitle');
+
+        let sleepTimeout=null, sleepEnd=null, timerOpen=false, tick=null;
+
+        function setPlaying(v) {
+            playIcon.className = v ? 'fas fa-pause' : 'fas fa-play';
+            v ? viz.classList.add('playing') : viz.classList.remove('playing');
+            nowTitle.textContent = v ? '106.5 FM — El Buen Samaritano' : 'En pausa';
+        }
+        btnPlay.addEventListener('click', () => {
+            if (audio.paused) audio.play().then(()=>setPlaying(true)).catch(()=>{});
+            else { audio.pause(); setPlaying(false); }
+        });
+        volSlider.addEventListener('input', e => {
+            audio.volume = e.target.value;
+            volFill.style.width = (e.target.value*100)+'%';
+        });
+
+        function toggleTimer() {
+            timerOpen=!timerOpen;
+            timerPanel.classList.toggle('open',timerOpen);
+            timerArrow.style.transform=timerOpen?'rotate(180deg)':'';
+        }
+        function setSleep(m) {
+            if(sleepTimeout){clearTimeout(sleepTimeout);clearInterval(tick);}
+            timerOpen=false; timerPanel.classList.remove('open'); timerArrow.style.transform='';
+            sleepEnd=Date.now()+m*60000;
+            tick=setInterval(()=>{
+                const r=sleepEnd-Date.now();
+                if(r<=0){clearInterval(tick);timerLabel.innerHTML='Apagado automático';return;}
+                const mm=Math.floor(r/60000),ss=Math.floor((r%60000)/1000);
+                timerLabel.innerHTML=`Apagando en <span>${mm}:${String(ss).padStart(2,'0')}</span>`;
+            },1000);
+            sleepTimeout=setTimeout(()=>{
+                clearInterval(tick);
+                if(!audio.paused){audio.pause();setPlaying(false);}
+                timerLabel.innerHTML='Apagado automático'; sleepTimeout=null;
+            },m*60000);
+            timerLabel.innerHTML=`Apagando en <span>${m}:00</span>`;
+        }
+
+        function openDrawer()  { document.getElementById('drawerOverlay').classList.add('active'); }
+        function closeDrawer() { document.getElementById('drawerOverlay').classList.remove('active'); }
+        function closeDrawerOut(e){ if(e.target===document.getElementById('drawerOverlay'))closeDrawer(); }
+
+        const APP_URL='https://play.google.com/store/apps/details?id=el.buen.samaritano.sc.lc.fm';
+        const MSG_RAW=' ¡Escucha Radio Católica El Buen Samaritano 106.5 FM en vivo!\n las 24 horas.\n Descarga la app gratis: '+APP_URL;
+        const MSG=encodeURIComponent(MSG_RAW);
+        const URL_ENC=encodeURIComponent(APP_URL);
+
+        const shareOpts=[
+            {l:'WhatsApp', i:'fab fa-whatsapp',   c:'si-wa', h:'https://wa.me/?text='+MSG},
+            {l:'Telegram', i:'fab fa-telegram',   c:'si-tg', h:'https://t.me/share/url?url='+URL_ENC+'&text='+MSG},
+            {l:'Facebook', i:'fab fa-facebook-f', c:'si-fb', h:'https://www.facebook.com/sharer/sharer.php?u='+URL_ENC},
+            {l:'X/Twitter',i:'fab fa-x-twitter',  c:'si-tw', h:'https://twitter.com/intent/tweet?text='+MSG},
+            {l:'SMS',      i:'fas fa-comment-sms',c:'si-sms',h:'sms:?body='+MSG},
+            {l:'Correo',   i:'fas fa-envelope',   c:'si-em', h:'mailto:?subject='+encodeURIComponent('Radio El Buen Samaritano 106.5 FM')+'&body='+MSG},
+            {l:'TikTok',   i:'fab fa-tiktok',     c:'si-tt', h:'https://www.tiktok.com/'},
+            {l:'Instagram',i:'fab fa-instagram',  c:'si-ig', h:'instagram://app'},
+        ];
+
+        function shareApp() { closeDrawer(); document.getElementById('shareOverlay').classList.add('active'); }
+        function closeShare(){ document.getElementById('shareOverlay').classList.remove('active'); }
+        function closeShareOut(e){ if(e.target===document.getElementById('shareOverlay'))closeShare(); }
+
+        const legal={
+            privacy:{
+                title:'Política de Privacidad',
+                body:`<h4>1. Información que recopilamos</h4>
+                <p>Esta aplicación no recopila información personal identificable. El acceso a la transmisión de audio es anónimo y no requiere registro.</p>
+                <h4>2. Uso de datos</h4>
+                <p>No almacenamos, vendemos ni compartimos datos personales. La app únicamente conecta al servidor de audio para reproducir la transmisión en vivo de Radio Católica El Buen Samaritano 106.5 FM.</p>
+                <h4>3. Servicios de terceros</h4>
+                <p>Los enlaces a WhatsApp y redes sociales redirigen a plataformas externas con sus propias políticas de privacidad, independientes de INTEE Broadcast y Tecnología.</p>
+                <h4>4. Permisos</h4>
+                <p>Solo se requiere acceso a internet para la reproducción de audio. No se solicita acceso a cámara, micrófono, contactos ni ubicación.</p>
+                <h4>5. Contacto</h4>
+                <p>Para dudas sobre privacidad, contáctanos por WhatsApp o llamada a cabina.</p>
+                <p style="margin-top:16px;font-size:.72rem;color:rgba(255,255,255,.3)">Enero 2025 · INTEE Broadcast y Tecnología</p>`
+            },
+            terms:{
+                title:'Términos de Uso',
+                body:`<h4>1. Aceptación</h4>
+                <p>Al usar esta aplicación aceptas estos términos. Si no estás de acuerdo, por favor no la utilices.</p>
+                <h4>2. Uso permitido</h4>
+                <p>La app es de uso personal y no comercial. La transmisión en vivo de Radio Católica El Buen Samaritano 106.5 FM es gratuita.</p>
+                <h4>3. Propiedad intelectual</h4>
+                <p>Todo el contenido transmitido es propiedad de Radio Católica El Buen Samaritano o sus licenciantes. Queda prohibida la grabación, redistribución o uso comercial sin autorización.</p>
+                <h4>4. Disponibilidad</h4>
+                <p>La transmisión puede interrumpirse por mantenimiento o causas técnicas. No se garantiza disponibilidad ininterrumpida.</p>
+                <h4>5. Limitación de responsabilidad</h4>
+                <p>El uso es bajo tu propio riesgo. No nos responsabilizamos por daños derivados del uso o imposibilidad de uso del servicio.</p>
+                <h4>6. Modificaciones</h4>
+                <p>Nos reservamos el derecho de modificar estos términos. El uso continuado implica aceptación de los cambios.</p>
+                <p style="margin-top:16px;font-size:.72rem;color:rgba(255,255,255,.3)">Enero 2025 · INTEE Broadcast y Tecnología</p>`
+            },
+            about:{
+                title:'Acerca de',
+                body:`<h4>Radio Católica El Buen Samaritano</h4>
+                <p>Transmisión oficial de <strong style="color:#fff">Radio Católica El Buen Samaritano 106.5 FM</strong>. — llevando la fe católica, la Palabra y la esperanza a cada hogar.</p>
+                <h4>Desarrollado por</h4>
+                <p style="color:#60D4F8;font-weight:700;font-size:.9rem">📡 INTEE Broadcast y Tecnología</p>
+                <p>Empresa especializada en soluciones de transmisión digital, desarrollo de aplicaciones de radio y tecnología broadcast para estaciones en México.</p>
+                <h4>Versión</h4>
+                <p>App versión 1.0 · Player Web 2.0</p>
+                <h4>Tecnologías</h4>
+                <p>Streaming de audio en vivo via HTML5 Audio API. Diseño responsivo optimizado para dispositivos móviles.</p>
+                <p style="margin-top:16px;font-size:.72rem;color:rgba(255,255,255,.3)">© 2025 INTEE Broadcast y Tecnología · Todos los derechos reservados</p>`
+            }
+        };
+
+        function openLegal(k){
+            closeDrawer();
+            document.getElementById('legalTitle').textContent=legal[k].title;
+            document.getElementById('legalBody').innerHTML=legal[k].body;
+            document.getElementById('legalOverlay').classList.add('active');
+        }
+        function closeLegal(){ document.getElementById('legalOverlay').classList.remove('active'); }
+
+        window.addEventListener('DOMContentLoaded',()=>{
+            const grid=document.getElementById('shareGrid');
+            shareOpts.forEach(o=>{
+                const a=document.createElement('a');
+                a.href=o.h; a.target='_blank'; a.className='share-btn';
+                a.innerHTML=`<div class="share-icon ${o.c}"><i class="${o.i}"></i></div><span>${o.l}</span>`;
+                grid.appendChild(a);
+            });
+            audio.volume=1;
+            audio.play().then(()=>setPlaying(true)).catch(()=>{});
+        });
+    </script>
+</body>
+</html>
