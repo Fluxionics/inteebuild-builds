@@ -49,7 +49,13 @@ jobs:
           cat "$GITHUB_ENV"
 
       - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
+        run: |
+          echo "ANDROID_HOME=$ANDROID_HOME"
+          echo "SDK check"
+          ls -la "$ANDROID_HOME/cmdline-tools" || true
+          yes | sdkmanager --licenses || true
+          sdkmanager --install "platform-tools" "platforms;android-35" "build-tools;35.0.0" 2>&1 | tail -20 || true
+          echo "SDK ready"
 
       - name: Install dependencies
         run: npm install
@@ -84,6 +90,25 @@ jobs:
 
       - name: Validate manifest XML
         run: python3 -c "import xml.dom.minidom,sys;xml.dom.minidom.parse('android/app/src/main/AndroidManifest.xml');print('manifest XML OK')"
+
+      - name: Install native permissions runtime
+        if: "hashFiles('NativePermissions.java') != ''"
+        run: |
+          PKG=$(node -p 'require("./build-config.json").packageName')
+          DST="android/app/src/main/java/$(echo $PKG | tr . /)"
+          mkdir -p "$DST"
+          cp NativePermissions.java "$DST/NativePermissions.java"
+          node patch-permissions.js
+          echo "--- permisos nativos instalados ---"
+          grep -c NativePermissions "$DST/MainActivity.java" || true
+
+      - name: Install catalog native patches
+        if: "hashFiles('patch-catalog.js') != ''"
+        run: |
+          node patch-catalog.js
+          echo "--- catalog patches aplicados ---"
+          PKG=$(node -p 'require("./build-config.json").packageName')
+          grep -c "FLAG_SECURE|DownloadListener" "android/app/src/main/java/$(echo $PKG | tr . /)/MainActivity.java" || true
 
       - name: Install background audio service
         if: "hashFiles('RadioService.java') != ''"
@@ -126,6 +151,12 @@ jobs:
         run: |
           mkdir -p android/app/src/main/assets/public
           cp inteebridge-inject.js android/app/src/main/assets/public/inteebridge.js
+
+      - name: Apply catalog assets
+        run: |
+          if [ -f "assetlinks.json" ]; then mkdir -p android/app/src/main/assets/.well-known; cp assetlinks.json android/app/src/main/assets/.well-known/assetlinks.json; echo "assetlinks ok"; fi
+          if [ -f "google-services.json" ]; then cp google-services.json android/app/google-services.json; echo "firebase ok"; fi
+          if [ -f "www/catalog.js" ]; then mkdir -p android/app/src/main/assets/public; cp www/catalog.js android/app/src/main/assets/public/catalog.js; echo "catalog js ok"; fi
 
       - name: Configure custom signing
         if: ${{ hashFiles('user-keystore.jks') != '' }}
