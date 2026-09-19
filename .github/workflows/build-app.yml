@@ -132,6 +132,17 @@ jobs:
           echo "--- servicio instalado ---"
           grep -c RadioService "$DST/MainActivity.java"
 
+      - name: Install native audio bridge (InteeAudio)
+        if: "hashFiles('AudioBridge.java') != ''"
+        run: |
+          PKG=$(node -p 'require("./build-config.json").packageName')
+          DST="android/app/src/main/java/$(echo $PKG | tr . /)"
+          mkdir -p "$DST"
+          cp AudioBridge.java "$DST/AudioBridge.java"
+          node patch-audio.js
+          echo "--- audio nativo instalado ---"
+          grep -c InteeAudio "$DST/MainActivity.java" || true
+
       - name: Apply app icon
         if: "hashFiles('app-icon.png') != ''"
         run: |
