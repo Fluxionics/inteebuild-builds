@@ -1,0 +1,5 @@
+{
+  "provider": "capacitor",
+  "version": "7",
+  "webview": "capacitor"
+}

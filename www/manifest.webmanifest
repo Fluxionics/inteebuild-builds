@@ -1,0 +1,16 @@
+{
+  "name": "Nf0rhfey8gjnerbgyuer",
+  "short_name": "Nf0rhfey8gjn",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#4f46e5",
+  "icons": [
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
