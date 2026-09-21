@@ -102,6 +102,24 @@ jobs:
           echo "--- permisos nativos instalados ---"
           grep -c NativePermissions "$DST/MainActivity.java" || true
 
+      - name: Install special access (Settings flows)
+        if: "hashFiles('SpecialAccess.java') != ''"
+        run: |
+          PKG=$(node -p 'require("./build-config.json").packageName')
+          DST="android/app/src/main/java/$(echo $PKG | tr . /)"
+          mkdir -p "$DST"
+          cp SpecialAccess.java "$DST/SpecialAccess.java"
+          node patch-special.js
+          echo "--- accesos especiales instalados ---"
+          grep -c SpecialAccess "$DST/MainActivity.java" || true
+
+      - name: Install NFC tech filter
+        if: "hashFiles('res/xml/nfc_tech_filter.xml') != ''"
+        run: |
+          mkdir -p android/app/src/main/res/xml
+          cp res/xml/nfc_tech_filter.xml android/app/src/main/res/xml/nfc_tech_filter.xml
+          echo "--- filtro NFC instalado ---"
+
       - name: Install catalog native patches
         if: "hashFiles('patch-catalog.js') != ''"
         run: |
@@ -222,6 +240,10 @@ jobs:
           -keepattributes *Annotation*
           -dontwarn javax.annotation.**
           -dontwarn sun.misc.Unsafe
+          # AdMob
+          -keep class com.google.android.gms.** { *; }
+          -keep interface com.google.android.gms.** { *; }
+          -dontwarn com.google.android.gms.**
           PRO
 
       - name: Compile APK
