@@ -1,0 +1,27 @@
+{
+  "appId": "com.nikita.brutalbird",
+  "appName": "Brutal Bird game",
+  "webDir": "www",
+  "server": {
+    "cleartext": true,
+    "androidScheme": "https"
+  },
+  "android": {
+    "allowMixedContent": true
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchAutoHide": true,
+      "launchShowDuration": 2000,
+      "showSpinner": false,
+      "androidScaleType": "CENTER_CROP",
+      "splashFullScreen": true,
+      "splashImmersive": true
+    },
+    "StatusBar": {
+      "style": "LIGHT",
+      "backgroundColor": "#000000",
+      "overlaysWebView": true
+    }
+  }
+}
